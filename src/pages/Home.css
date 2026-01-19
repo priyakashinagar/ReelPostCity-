@@ -1,0 +1,90 @@
+/* Home Page Styles */
+
+.home {
+  width: 100%;
+}
+
+/* Hero Section */
+
+.hero-section {
+  background: linear-gradient(to right, #60a5fa, #3b82f6, #1e40af);
+  color: white;
+  padding: 3rem 2rem;
+  text-align: left;
+}
+
+.hero-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  line-height: 1.2;
+}
+
+.hero-description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin: 0;
+  opacity: 0.95;
+  max-width: 800px;
+}
+
+/* Map Section */
+
+.map-section {
+  padding: 2rem;
+  background-color: #ffffff;
+  min-height: calc(100vh - 200px);
+}
+
+.map-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  height: 600px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Responsive Design */
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 2rem 1rem;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .hero-description {
+    font-size: 1rem;
+  }
+
+  .map-section {
+    padding: 1rem;
+    min-height: auto;
+  }
+
+  .map-wrapper {
+    height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-description {
+    font-size: 0.95rem;
+  }
+
+  .map-wrapper {
+    height: 350px;
+  }
+}
+
