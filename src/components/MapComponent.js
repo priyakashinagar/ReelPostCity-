@@ -134,14 +134,6 @@ function MapComponent({ zoom = 5 }) {
         mapInstanceRef.current = null;
       }
     };
-  }, []);
-
-  // Update zoom when the zoom prop changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (mapInstanceRef.current && zoom !== undefined) {
-      mapInstanceRef.current.setZoom(zoom);
-    }
   }, [zoom]);
 
   return (
