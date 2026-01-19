@@ -18,50 +18,46 @@ function Header({ currentPage, onNavigate }) {
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <a
+            <button
               className={`font-medium cursor-pointer transition-colors ${
                 currentPage === 'home'
                   ? 'text-blue-400 border-b-2 border-blue-400'
                   : 'text-gray-400 hover:text-white'
               }`}
-              role="button"
               onClick={() => onNavigate('home')}
             >
               Home
-            </a>
-            <a
+            </button>
+            <button
               onClick={() => onNavigate('posts')}
               className={`font-medium cursor-pointer transition-colors ${
                 currentPage === 'posts'
                   ? 'text-blue-400 border-b-2 border-blue-400'
                   : 'text-gray-400 hover:text-white'
               }`}
-              role="button"
             >
               Post
-            </a>
-            <a
+            </button>
+            <button
               onClick={() => onNavigate('about')}
               className={`font-medium cursor-pointer transition-colors ${
                 currentPage === 'about'
                   ? 'text-blue-400 border-b-2 border-blue-400'
                   : 'text-gray-400 hover:text-white'
               }`}
-              role="button"
             >
               About Us
-            </a>
-            <a
+            </button>
+            <button
               onClick={() => onNavigate('contact')}
               className={`font-medium cursor-pointer transition-colors ${
                 currentPage === 'contact'
                   ? 'text-blue-400 border-b-2 border-blue-400'
                   : 'text-gray-400 hover:text-white'
               }`}
-              role="button"
             >
               Contact Us
-            </a>
+            </button>
           </nav>
 
           {/* User Avatar */}
