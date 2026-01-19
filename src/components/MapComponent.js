@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+
+// Load Leaflet CSS from CDN
+const link = document.createElement('link');
+link.rel = 'stylesheet';
+link.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+document.head.appendChild(link);
 
 // Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
