@@ -75,7 +75,7 @@ function AboutUs() {
         </div>
       </section>
 
-      {/* Team Sections */}
+      {/* Teams Sections */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-900 to-gray-800">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent text-center mb-14">Meet Our Team</h2>
