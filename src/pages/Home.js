@@ -5,7 +5,7 @@ import Footer from '../components/Footer';
 
 function Home({ onNavigate }) {
   const [zoom, setZoom] = useState(3);
-  const [showMap, setShowMap] = useState(true);
+  const [showMap] = useState(true);
 
   const handleZoomIn = () => {
     setZoom((prev) => Math.min(prev + 0.5, 18));

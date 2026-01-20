@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Footer from '../components/Footer';
 
 function Posts({ onNavigate }) {
-  const [selectedPost, setSelectedPost] = useState(null);
+  // const [selectedPost, setSelectedPost] = useState(null);
   const [likes, setLikes] = useState({});
   const [hoveredVideoId, setHoveredVideoId] = useState(null);
 
