@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import MapComponent from '../components/MapComponent';
 
 function Home({ onNavigate }) {
-  const [zoom, setZoom] = useState(5);
+  const [zoom, setZoom] = useState(3);
 
   const handleZoomIn = () => {
     setZoom((prev) => Math.min(prev + 0.5, 18));
@@ -13,7 +13,7 @@ function Home({ onNavigate }) {
   };
 
   const handleReset = () => {
-    setZoom(5);
+    setZoom(3);
   };
 
   return (
@@ -22,7 +22,7 @@ function Home({ onNavigate }) {
       <section className="w-full h-full bg-blue-100 p-4 sm:p-6 lg:p-8 z-0">
         <div className="w-full h-full">
           <div className="relative w-full h-full rounded-xl overflow-hidden shadow-2xl">
-            <MapComponent zoom={zoom} />
+            <MapComponent zoom={zoom} onNavigate={onNavigate} />
 
             {/* Zoom Controls */}
             <div className="absolute right-4 bottom-4 sm:right-6 sm:bottom-6 flex flex-col gap-3 z-40">

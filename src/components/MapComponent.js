@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 
-// Load Leaflet CSS from CDN
-const link = document.createElement('link');
-link.rel = 'stylesheet';
-link.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
-document.head.appendChild(link);
+// Load Leaflet CSS from CDN - Only once
+if (!document.querySelector('link[href*="leaflet.min.css"]')) {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+  document.head.appendChild(link);
+}
 
 // Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -74,36 +76,47 @@ const CITIES = [
   },
 ];
 
-function MapComponent({ zoom = 5 }) {
+function MapComponent({ zoom = 3, onNavigate }) {
   const containerRef = useRef(null);
   const [selectedCity, setSelectedCity] = useState(null);
   const mapInstanceRef = useRef(null);
+  const markerLayerRef = useRef(null);
 
   useEffect(() => {
     if (!containerRef.current || mapInstanceRef.current) return;
 
-    // Initialize map only once
-    const map = L.map(containerRef.current).setView([20, 78], zoom);
+    // Initialize map - IMPORTANT: worldCopyJump prevents map from repeating
+    const map = L.map(containerRef.current, {
+      worldCopyJump: false, // Prevents map wrapping/repeating on left/right
+      zoomAnimation: false,
+      dragging: true, // Enable panning/scrolling
+      touchZoom: true,
+      scrollWheelZoom: true,
+      minZoom: 3, // Prevent zooming out more than this
+      maxZoom: 18, // Maximum zoom level
+    }).setView([20, 78], zoom);
 
     // Add tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
       maxZoom: 19,
+      noWrap: true, // Prevents tiles from wrapping
     }).addTo(map);
 
-    // Configure map controls and interactions
+    // Configure map interactions
     map.dragging.enable();
     map.touchZoom.enable();
     map.scrollWheelZoom.enable();
-    map.zoomAnimation = false;
 
     mapInstanceRef.current = map;
+    markerLayerRef.current = L.featureGroup().addTo(map);
 
     // Add city markers
+    const cityMarkers = [];
     CITIES.forEach((city) => {
       const html = `
-        <div style="position: relative;">
-          <div style="width: 64px; height: 64px; border-radius: 8px; overflow: hidden; border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer;">
+        <div style="position: relative; cursor: pointer;">
+          <div style="width: 64px; height: 64px; border-radius: 8px; overflow: hidden; border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
             <img src="${city.image}" alt="${city.name}" style="width: 100%; height: 100%; object-fit: cover;" />
           </div>
           <div style="position: absolute; top: -8px; right: -8px; width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; box-shadow: 0 2px 8px rgba(37,99,235,0.4); border: 2px solid white;">
@@ -112,7 +125,7 @@ function MapComponent({ zoom = 5 }) {
         </div>
       `;
 
-      L.marker([city.lat, city.lng], {
+      const marker = L.marker([city.lat, city.lng], {
         icon: L.divIcon({
           html: html,
           className: 'custom-marker',
@@ -123,9 +136,22 @@ function MapComponent({ zoom = 5 }) {
       })
         .addTo(map)
         .on('click', () => {
+          // Set selected city
           setSelectedCity(city);
+          // Center map on clicked city
+          map.setView([city.lat, city.lng], Math.max(zoom, 10));
         });
+
+      cityMarkers.push(marker);
     });
+
+    // Fit all markers on the map with padding
+    if (cityMarkers.length > 0) {
+      const group = new L.featureGroup(cityMarkers);
+      setTimeout(() => {
+        map.fitBounds(group.getBounds(), { padding: [100, 30, 50, 50], animate: false, maxZoom: 4 });
+      }, 100);
+    }
 
     // Cleanup
     return () => {
@@ -136,16 +162,26 @@ function MapComponent({ zoom = 5 }) {
     };
   }, [zoom]);
 
+  const handleNavigateToPost = (city) => {
+    if (onNavigate) {
+      onNavigate('posts', { city: city.name });
+    }
+  };
+
   return (
     <div className="relative w-full h-full">
-      <div ref={containerRef} className="w-full h-full bg-blue-100" style={{ filter: 'drop-shadow(0 4px 20px rgba(0, 0, 0, 0.15))' }} />
+      <div 
+        ref={containerRef} 
+        className="w-full h-full bg-blue-100" 
+        style={{ filter: 'drop-shadow(0 4px 20px rgba(0, 0, 0, 0.15))' }} 
+      />
 
-      {/* City Info Card */}
+      {/* City Info Card - Tailwind Styled */}
       {selectedCity && (
         <div className="absolute top-5 left-5 bg-white rounded-xl shadow-2xl p-4 max-w-xs z-40 animate-in slide-in-from-top-2 duration-300">
           <button
             onClick={() => setSelectedCity(null)}
-            className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 font-bold text-lg"
+            className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 font-bold text-lg transition-colors"
           >
             ✕
           </button>
@@ -156,28 +192,22 @@ function MapComponent({ zoom = 5 }) {
               className="w-full h-full object-cover"
             />
           </div>
-          <h3 className="text-lg font-bold text-gray-900 mb-2">
+          <h3 className="text-lg font-bold text-gray-900 mb-1">
             {selectedCity.name}
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 mb-4">
             Location #{selectedCity.number}
           </p>
+          
+          {/* View Posts Button */}
+          <button
+            onClick={() => handleNavigateToPost(selectedCity)}
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+          >
+            View Posts
+          </button>
         </div>
       )}
-
-      <style>{`
-        .custom-marker {
-          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-        }
-        
-        .custom-marker:hover {
-          filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
-        }
-
-        .leaflet-container {
-          background-color: #dbeafe !important;
-        }
-      `}</style>
     </div>
   );
 }
