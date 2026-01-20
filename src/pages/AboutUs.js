@@ -81,9 +81,9 @@ function AboutUs() {
           <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent text-center mb-14">Meet Our Team</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {team.map(member => (
-              <div key={member.id} className="bg-gray-800 rounded-lg p-6 border border-blue-500 shadow-lg shadow-blue-500/50 hover:shadow-blue-400/70 transition-all duration-300 hover:scale-105 text-center">
+              <div key={member.id} className="bg-gray-800 rounded-lg p-6 border border-gray-700 shadow-lg shadow-blue-400/20 hover:shadow-blue-400/40 transition-all duration-300 hover:scale-105 text-center">
                 <div className="mb-6 flex justify-center">
-                  <img src={member.image} alt={member.name} className="w-32 h-32 rounded-full object-cover border-4 border-blue-500 shadow-lg shadow-blue-500/50 hover:scale-110 transition-transform duration-300" />
+                  <img src={member.image} alt={member.name} className="w-32 h-32 rounded-full object-cover border-4 border-blue-500 shadow-lg shadow-blue-400/30 hover:scale-110 transition-transform duration-300" />
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">{member.name}</h3>
                 <p className="text-blue-400 font-semibold text-sm">{member.role}</p>
@@ -103,7 +103,7 @@ function AboutUs() {
           <img 
             src="https://picsum.photos/800/300?random=200" 
             alt="World Map" 
-            className="w-full rounded-lg shadow-lg shadow-blue-500/30 border border-blue-500 hover:shadow-blue-400/50 transition-all duration-300"
+            className="w-full rounded-lg shadow-lg shadow-blue-400/20 border border-gray-700 hover:shadow-blue-400/40 transition-all duration-300"
           />
         </div>
       </section>
@@ -114,7 +114,7 @@ function AboutUs() {
           <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent text-center mb-14">Our Values</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, idx) => (
-              <div key={idx} className="bg-gray-900 rounded-lg p-8 text-center border border-blue-500 shadow-lg shadow-blue-500/50 hover:shadow-blue-400/70 transition-all duration-300 hover:scale-105 hover:bg-gray-800">
+              <div key={idx} className="bg-gray-900 rounded-lg p-8 text-center border border-gray-700 shadow-lg shadow-blue-400/20 hover:shadow-blue-400/40 transition-all duration-300 hover:scale-105 hover:bg-gray-800">
                 <div className="text-6xl mb-6 transform hover:scale-110 transition-transform duration-300">{value.icon}</div>
                 <h3 className="text-lg font-bold text-blue-400 mb-3">{value.title}</h3>
                 <p className="text-gray-300 text-sm leading-relaxed">{value.description}</p>

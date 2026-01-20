@@ -139,7 +139,7 @@ function PostDetail({ post, onNavigate }) {
                   <p><strong className="text-white">Views:</strong> <span className="text-gray-400">1,245</span></p>
                 </div>
                 <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors mt-4">
-                  View City Posts
+                  <span className="shine-text cursor-pointer" onClick={() => onNavigate('home')}>View DhvaniCast</span>
                 </button>
               </div>
 

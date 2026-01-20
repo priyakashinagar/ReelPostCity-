@@ -2,7 +2,7 @@ import React from 'react';
 
 function Header({ currentPage, onNavigate }) {
   return (
-    <header className="bg-gray-800 border-b border-blue-500 sticky top-0 z-50 shadow-lg shadow-blue-500/30">
+    <header className="bg-black/50 backdrop-blur-md border-b border-gray-800/50 sticky top-0 z-50 shadow-lg shadow-black/20 navbar-bottom-shine">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -10,10 +10,12 @@ function Header({ currentPage, onNavigate }) {
             className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => onNavigate('home')}
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center shadow-md shadow-blue-400/50">
-              <span className="text-xl text-white">🌍</span>
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center shadow-xl relative overflow-hidden blue-shine-border">
+              <span className="text-xl text-white z-10">🌍</span>
+              {/* Animated blue shine */}
+              <span className="absolute inset-0 rounded-lg pointer-events-none animate-shine bg-gradient-to-br from-blue-300/40 via-blue-400/60 to-blue-600/40 blur-sm opacity-80" />
             </div>
-            <span className="text-xl font-bold text-white">City Posts</span>
+            <span className="text-xl font-bold shine-text" style={{cursor:'pointer'}} onClick={() => onNavigate('home')}>DhvaniCast</span>
           </div>
 
           {/* Navigation */}

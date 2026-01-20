@@ -45,7 +45,7 @@ function ContactUs() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Form */}
-            <div className="bg-gray-800 rounded-lg p-8 border border-blue-500 shadow-lg shadow-blue-500/50">
+            <div className="bg-gray-800 rounded-lg p-8 border border-gray-700 shadow-lg shadow-blue-400/20">
               <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2">Send Your Inquiry</h2>
               <p className="text-gray-400 mb-8">Please fill out the form below to send your inquiry.</p>
               
@@ -132,7 +132,7 @@ function ContactUs() {
             {/* Contact Info */}
             <div className="space-y-6">
               {/* Support Details */}
-              <div className="bg-gray-800 rounded-lg p-8 border border-blue-500 shadow-lg shadow-blue-500/50">
+              <div className="bg-gray-800 rounded-lg p-8 border border-gray-700 shadow-lg shadow-blue-400/20">
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-6">Support Details</h2>
                 
                 <div className="space-y-6">
@@ -162,7 +162,7 @@ function ContactUs() {
               </div>
 
               {/* Location Map */}
-              <div className="bg-gray-800 rounded-lg p-8 border border-blue-500 shadow-lg shadow-blue-500/50">
+              <div className="bg-gray-800 rounded-lg p-8 border border-gray-700 shadow-lg shadow-blue-400/20">
                 <h3 className="text-lg font-bold text-blue-400 mb-4 flex items-center gap-2">📌 Our Location</h3>
                 <div className="rounded-lg overflow-hidden" style={{height: '300px'}}>
                   <MapComponent />
