@@ -111,7 +111,7 @@ function Subscription({ onNavigate }) {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-20 px-2 sm:px-0">
           {plans.map((plan) => (
             <div
               key={plan.id}
@@ -127,7 +127,7 @@ function Subscription({ onNavigate }) {
               )}
 
               {/* Card Content */}
-              <div className="bg-gray-900 rounded-2xl p-8 h-full flex flex-col">
+              <div className="bg-gray-900 rounded-2xl p-6 sm:p-8 h-full flex flex-col">
                 {/* Title */}
                 <h2 className="text-3xl font-bold text-white mb-2">
                   {plan.name}
@@ -245,8 +245,8 @@ function Subscription({ onNavigate }) {
 
       {/* PAYMENT MODAL */}
       {paymentModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50">
-          <div className="bg-gray-900 rounded-2xl p-8 w-full max-w-md border border-blue-500/30 shadow-2xl">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 px-4 sm:px-0">
+          <div className="bg-gray-900 rounded-2xl p-6 sm:p-8 w-full max-w-md border border-blue-500/30 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold text-gray-100 mb-6">Complete Payment</h2>
             
             <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg p-4 mb-6 text-white">

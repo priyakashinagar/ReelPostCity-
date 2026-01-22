@@ -23,6 +23,10 @@ import Profile from '../pages/Profile.jsx';
 import Subscription from '../pages/Subscription.jsx';
 import PostAd from '../pages/PostAd.jsx';
 import MyAds from '../pages/MyAds.jsx';
+import PrivacyAndSafety from '../pages/PrivacyAndSafety.jsx';
+import NotificationSettings from '../pages/NotificationSettings.jsx';
+import Preferences from '../pages/Preferences.jsx';
+import HelpAndSupport from '../pages/HelpAndSupport.jsx';
 
 /**
  * Map of route IDs to their components
@@ -47,7 +51,13 @@ const componentMap = {
   // PROTECTED
   'subscription': Subscription,
   'post-ad': PostAd,
-  'my-ads': MyAds
+  'my-ads': MyAds,
+  
+  // SETTINGS PAGES
+  'privacy-and-safety': PrivacyAndSafety,
+  'notification-settings': NotificationSettings,
+  'preferences': Preferences,
+  'help-and-support': HelpAndSupport
 };
 
 /**
@@ -179,7 +189,7 @@ export const renderRoute = (currentPage, routeProps) => {
  * Check if header should be shown for current page
  */
 export const shouldShowHeader = (currentPage) => {
-  const hiddenRoutes = ['posts', 'explore', 'likes', 'messages', 'notifications', 'profile', 'create-post', 'auth', 'post-ad', 'my-ads'];
+  const hiddenRoutes = ['posts', 'explore', 'likes', 'messages', 'notifications', 'profile', 'create-post', 'auth', 'post-ad', 'my-ads', 'privacy-and-safety', 'notification-settings', 'preferences', 'help-and-support'];
   return !hiddenRoutes.includes(currentPage);
 };
 

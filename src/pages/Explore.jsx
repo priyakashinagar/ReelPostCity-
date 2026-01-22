@@ -149,8 +149,8 @@ function Explore({ onNavigate }) {
 
       {/* MODAL */}
       {selectedCity && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-2xl p-8 max-w-md w-full border border-blue-500/50">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-2xl p-6 md:p-8 max-w-md w-full border border-blue-500/50 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold text-gray-100">{selectedCity.name}</h2>
               <button onClick={() => setSelectedCity(null)} className="text-2xl text-gray-400 hover:text-gray-300">✕</button>

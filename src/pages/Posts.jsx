@@ -460,6 +460,8 @@ function Posts({ onNavigate, userType }) {
               loop
               muted
               playsInline
+              controls
+              controlsList="nodownload"
               className="w-full h-96 object-cover"
             >
               <source src={post.videoSrc} type="video/mp4" />

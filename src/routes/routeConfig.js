@@ -121,6 +121,42 @@ export const routeConfig = {
       protected: true,
       showInHeader: true,
       requiresAuth: true
+    },
+    PRIVACY_AND_SAFETY: {
+      id: 'privacy-and-safety',
+      path: '/privacy-and-safety',
+      label: 'Privacy & Safety',
+      type: ROUTE_TYPES.PRIVATE,
+      protected: true,
+      showInHeader: false,
+      requiresAuth: true
+    },
+    NOTIFICATION_SETTINGS: {
+      id: 'notification-settings',
+      path: '/notification-settings',
+      label: 'Notification Settings',
+      type: ROUTE_TYPES.PRIVATE,
+      protected: true,
+      showInHeader: false,
+      requiresAuth: true
+    },
+    PREFERENCES: {
+      id: 'preferences',
+      path: '/preferences',
+      label: 'Preferences',
+      type: ROUTE_TYPES.PRIVATE,
+      protected: true,
+      showInHeader: false,
+      requiresAuth: true
+    },
+    HELP_AND_SUPPORT: {
+      id: 'help-and-support',
+      path: '/help-and-support',
+      label: 'Help & Support',
+      type: ROUTE_TYPES.PRIVATE,
+      protected: true,
+      showInHeader: false,
+      requiresAuth: true
     }
   },
 

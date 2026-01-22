@@ -13,6 +13,11 @@ function Profile({ onNavigate }) {
   });
 
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
+  const [notificationModalOpen, setNotificationModalOpen] = useState(false);
+  const [preferencesModalOpen, setPreferencesModalOpen] = useState(false);
+  const [helpModalOpen, setHelpModalOpen] = useState(false);
+
   const [editForm, setEditForm] = useState({
     name: userProfile.name,
     username: userProfile.username,
@@ -140,6 +145,38 @@ function Profile({ onNavigate }) {
             ))}
           </div>
 
+          {/* Mobile Settings Section - Only visible on mobile */}
+          <div className="lg:hidden mb-8">
+            <h2 className="text-lg font-bold text-gray-100 mb-4">Account Settings</h2>
+            <div className="space-y-3">
+              <button
+                onClick={() => setPrivacyModalOpen(true)}
+                className="w-full text-left px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 text-gray-300 transition-all text-sm font-medium">
+                🔐 Privacy & Safety
+              </button>
+              <button
+                onClick={() => setNotificationModalOpen(true)}
+                className="w-full text-left px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 text-gray-300 transition-all text-sm font-medium">
+                🔔 Notification Settings
+              </button>
+              <button
+                onClick={() => setPreferencesModalOpen(true)}
+                className="w-full text-left px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 text-gray-300 transition-all text-sm font-medium">
+                ⚙ Preferences
+              </button>
+              <button
+                onClick={() => setHelpModalOpen(true)}
+                className="w-full text-left px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 text-gray-300 transition-all text-sm font-medium">
+                ❓ Help & Support
+              </button>
+              <button
+                onClick={handleLogout}
+                className="w-full text-left px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-red-500 text-gray-300 transition-all text-sm font-medium hover:text-red-400">
+                🚪 Logout
+              </button>
+            </div>
+          </div>
+
           {/* Posts Grid */}
           <div className="mb-8">
             <h2 className="text-xl md:text-2xl font-bold text-gray-100 mb-6 md:mb-8 flex items-center gap-2">
@@ -156,7 +193,6 @@ function Profile({ onNavigate }) {
                     alt={`Post ${idx}`}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all"></div>
                 </div>
               ))}
             </div>
@@ -173,21 +209,21 @@ function Profile({ onNavigate }) {
             className="w-full text-left px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 text-gray-300 transition-all text-sm font-medium">
             📝 Edit Profile
           </button>
-          <button onClick={() => alert('Privacy & Safety settings coming soon!')} className="w-full text-left px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 text-gray-300 transition-all text-sm font-medium">
+          <button onClick={() => onNavigate('privacy-and-safety')} className="w-full text-left px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 text-gray-300 transition-all text-sm font-medium">
             🔐 Privacy & Safety
           </button>
-          <button onClick={() => alert('Notification Settings coming soon!')} className="w-full text-left px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 text-gray-300 transition-all text-sm font-medium">
+          <button onClick={() => onNavigate('notification-settings')} className="w-full text-left px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 text-gray-300 transition-all text-sm font-medium">
             🔔 Notification Settings
           </button>
-          <button onClick={() => alert('Preferences coming soon!')} className="w-full text-left px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 text-gray-300 transition-all text-sm font-medium">
+          <button onClick={() => onNavigate('preferences')} className="w-full text-left px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 text-gray-300 transition-all text-sm font-medium">
             ⚙ Preferences
           </button>
         </div>
 
         <div className="mt-8 pt-6 border-t border-gray-700">
           <h3 className="text-sm font-bold text-gray-300 mb-4 uppercase tracking-wider">Other</h3>
-          <button onClick={() => alert('Help & Support coming soon!')} className="w-full text-left px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 text-gray-300 transition-all text-sm">
-            Help & Support
+          <button onClick={() => onNavigate('help-and-support')} className="w-full text-left px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 text-gray-300 transition-all text-sm">
+            <span className="whitespace-nowrap lg:text-nowrap">❓ Help & Support</span>
           </button>
           <button 
             onClick={handleLogout}
@@ -198,9 +234,9 @@ function Profile({ onNavigate }) {
       </aside>
 
       {/* EDIT PROFILE MODAL */}
-      {editModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 rounded-2xl p-6 md:p-8 w-full max-w-md border border-blue-500/30 shadow-2xl">
+    {editModalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 px-4 sm:px-0">
+          <div className="bg-gray-900 rounded-2xl p-6 sm:p-8 w-full max-w-md border border-blue-500/30 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold text-gray-100 mb-6">Edit Profile</h2>
             
             <div className="space-y-4 mb-6">
@@ -247,6 +283,172 @@ function Profile({ onNavigate }) {
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold"
               >
                 Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PRIVACY & SAFETY MODAL */}
+      {privacyModalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-2xl p-6 md:p-8 w-full max-w-md border border-blue-500/30 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-gray-100 mb-6">🔐 Privacy & Safety</h2>
+            
+            <div className="space-y-4 mb-6">
+              <p className="text-gray-300 text-sm">Control who can see your profile, messages, and posts.</p>
+              <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                <p className="text-gray-400 text-sm">
+                  • Profile visibility<br/>
+                  • Who can message you<br/>
+                  • Blocking options<br/>
+                  • Data privacy settings
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setPrivacyModalOpen(false)}
+                className="flex-1 px-4 py-2 border border-gray-700 text-gray-300 rounded-lg hover:border-gray-600 transition-all"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => setPrivacyModalOpen(false)}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold"
+              >
+                Update Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* NOTIFICATION SETTINGS MODAL */}
+      {notificationModalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-2xl p-6 md:p-8 w-full max-w-md border border-blue-500/30 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-gray-100 mb-6">🔔 Notification Settings</h2>
+            
+            <div className="space-y-4 mb-6">
+              <p className="text-gray-300 text-sm">Manage how you receive notifications.</p>
+              <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400 text-sm">Message notifications</span>
+                  <input type="checkbox" defaultChecked className="w-4 h-4" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400 text-sm">Like notifications</span>
+                  <input type="checkbox" defaultChecked className="w-4 h-4" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400 text-sm">Comment notifications</span>
+                  <input type="checkbox" defaultChecked className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setNotificationModalOpen(false)}
+                className="flex-1 px-4 py-2 border border-gray-700 text-gray-300 rounded-lg hover:border-gray-600 transition-all"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => setNotificationModalOpen(false)}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PREFERENCES MODAL */}
+      {preferencesModalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-2xl p-6 md:p-8 w-full max-w-md border border-blue-500/30 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-gray-100 mb-6">⚙ Preferences</h2>
+            
+            <div className="space-y-4 mb-6">
+              <p className="text-gray-300 text-sm">Customize your experience on DhvaniCast.</p>
+              <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400 text-sm">Dark mode</span>
+                  <input type="checkbox" defaultChecked className="w-4 h-4" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400 text-sm">Compact view</span>
+                  <input type="checkbox" className="w-4 h-4" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400 text-sm">Language: English</span>
+                  <select className="bg-gray-700 text-gray-300 rounded px-2 py-1 text-sm">
+                    <option>English</option>
+                    <option>Hindi</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setPreferencesModalOpen(false)}
+                className="flex-1 px-4 py-2 border border-gray-700 text-gray-300 rounded-lg hover:border-gray-600 transition-all"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => setPreferencesModalOpen(false)}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* HELP & SUPPORT MODAL */}
+      {helpModalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-2xl p-6 md:p-8 w-full max-w-md border border-blue-500/30 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-gray-100 mb-6">❓ Help & Support</h2>
+            
+            <div className="space-y-4 mb-6">
+              <p className="text-gray-300 text-sm">Get help with common questions and issues.</p>
+              <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-3">
+                <p className="text-gray-400 text-sm font-semibold">Common Questions:</p>
+                <ul className="text-gray-400 text-sm space-y-2">
+                  <li>• How do I edit my profile?</li>
+                  <li>• How do I reset my password?</li>
+                  <li>• How do I report a problem?</li>
+                  <li>• Where is my data stored?</li>
+                </ul>
+              </div>
+              <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                <p className="text-gray-400 text-sm">
+                  Need more help? Contact us at:<br/>
+                  <span className="text-blue-400">support@dhvanicast.com</span>
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setHelpModalOpen(false)}
+                className="flex-1 px-4 py-2 border border-gray-700 text-gray-300 rounded-lg hover:border-gray-600 transition-all"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => setHelpModalOpen(false)}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold"
+              >
+                Contact Support
               </button>
             </div>
           </div>

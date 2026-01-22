@@ -127,8 +127,7 @@ function Messages({ onNavigate }) {
             {chats.map((chat) => (
               <div 
                 key={chat.id}
-                onClick={() => setSelectedChat(chat)}
-                className="bg-gradient-to-br from-gray-800 to-gray-750 rounded-2xl p-5 border border-gray-700 shadow-lg shadow-blue-400/20 hover:border-blue-400/50 hover:shadow-blue-400/40 transition-all hover:bg-gradient-to-br hover:from-gray-700 hover:to-gray-650 cursor-pointer group"
+                className="bg-gradient-to-br from-gray-800 to-gray-750 rounded-2xl p-5 border border-gray-700 shadow-lg shadow-blue-400/20 hover:border-blue-400/50 hover:shadow-blue-400/40 transition-all hover:bg-gradient-to-br hover:from-gray-700 hover:to-gray-650 group"
               >
                 <div className="flex items-start gap-4">
                   <img src={chat.avatar} alt={chat.name} className="w-14 h-14 rounded-full border-2 border-blue-500/50 group-hover:border-blue-400" />
@@ -149,6 +148,19 @@ function Messages({ onNavigate }) {
                     </div>
                   )}
                 </div>
+                {/* Mobile chat button */}
+                <button
+                  className="lg:hidden mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 rounded-lg transition-all"
+                  onClick={() => setSelectedChat(chat)}
+                >
+                  Chat Now
+                </button>
+                {/* Desktop: whole card is clickable */}
+                <div
+                  className="hidden lg:block absolute inset-0 cursor-pointer"
+                  onClick={() => setSelectedChat(chat)}
+                  style={{ zIndex: 1 }}
+                />
               </div>
             ))}
           </div>
@@ -203,6 +215,62 @@ function Messages({ onNavigate }) {
           <p className="text-gray-400 text-center py-12">Select a chat to start messaging</p>
         )}
       </aside>
+
+      {/* MOBILE CHAT MODAL - Shows full screen chat on mobile */}
+      {selectedChat && (
+        <div className="lg:hidden fixed inset-0 bg-gray-900 z-50 flex flex-col top-20">
+          {/* Chat Header */}
+          <div className="bg-black/70 backdrop-blur-md border-b border-gray-800/50 px-4 py-3 flex items-center gap-3 flex-shrink-0">
+            <button
+              onClick={() => setSelectedChat(null)}
+              className="p-2 hover:bg-gray-800 rounded-lg transition-colors text-white hover:text-blue-400"
+              title="Back to chats"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <img src={selectedChat.avatar} alt={selectedChat.name} className="w-10 h-10 rounded-full" />
+            <div>
+              <p className="font-semibold text-gray-100 text-sm">{selectedChat.name}</p>
+              <p className="text-xs text-gray-500">Active now</p>
+            </div>
+          </div>
+          
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {(chatMessages[selectedChat.id] || []).map((msg) => (
+              <div key={msg.id} className={`flex ${msg.sender === 'you' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-xs rounded-lg p-3 ${msg.sender === 'you' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-800 border border-gray-700 text-gray-300'}`}>
+                  <p className="text-sm">{msg.text}</p>
+                  <p className={`text-xs mt-1 ${msg.sender === 'you' ? 'text-blue-200' : 'text-gray-500'}`}>{msg.time}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Message Input */}
+          <div className="bg-black/70 backdrop-blur-md border-t border-gray-800/50 p-4 flex-shrink-0 space-y-2">
+            <textarea 
+              placeholder="Type a message..." 
+              value={messageInput}
+              onChange={(e) => setMessageInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-500 resize-none" 
+              rows="3"
+            />
+            <button 
+              onClick={handleSendMessage}
+              disabled={!messageInput.trim()}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm font-semibold py-2 rounded-lg transition-all"
+            >
+              Send Message
+            </button>
+          </div>
+        </div>
+      )}
     </div>
     </>
   );
