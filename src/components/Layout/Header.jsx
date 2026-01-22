@@ -123,11 +123,12 @@ function Header({ currentPage, onNavigate }) {
           {/* Hamburger Menu for Mobile */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden flex flex-col gap-1 mr-4"
+            className="md:hidden flex flex-col gap-1.5 p-2 -mr-2 hover:bg-gray-800/50 rounded-lg transition-colors"
+            title="Toggle menu"
           >
-            <span className={`w-6 h-0.5 bg-white transition-all ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-            <span className={`w-6 h-0.5 bg-white transition-all ${mobileMenuOpen ? 'opacity-0' : ''}`}></span>
-            <span className={`w-6 h-0.5 bg-white transition-all ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+            <span className={`w-6 h-0.5 bg-white transition-all duration-300 ease-out ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+            <span className={`w-6 h-0.5 bg-white transition-all duration-300 ease-out ${mobileMenuOpen ? 'opacity-0' : ''}`}></span>
+            <span className={`w-6 h-0.5 bg-white transition-all duration-300 ease-out ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
           </button>
 
           {/* Right Side - User Info & Logout */}
@@ -186,8 +187,24 @@ function Header({ currentPage, onNavigate }) {
 
     {/* Mobile Menu - Overlays content */}
     {mobileMenuOpen && (
-      <div className="fixed inset-0 top-14 bg-black/70 backdrop-blur-md z-40 md:hidden">
-        <nav className="flex flex-col p-4 space-y-2">
+      <>
+        {/* Backdrop */}
+        <div className="fixed inset-0 top-14 bg-black/50 z-30 md:hidden" onClick={() => setMobileMenuOpen(false)}></div>
+        
+        {/* Menu Panel - Narrow width from right */}
+        <div className="fixed right-0 top-14 bottom-0 w-72 bg-black/95 backdrop-blur-md z-40 md:hidden border-l border-blue-500/30 shadow-2xl overflow-y-auto">
+          {/* Close Button */}
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white transition-colors"
+            title="Close menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          <nav className="flex flex-col p-4 pt-12 space-y-2">
           <button
             onClick={() => handleNavigation('home')}
             className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
@@ -207,6 +224,46 @@ function Header({ currentPage, onNavigate }) {
             }`}
           >
             📝 Post
+          </button>
+          <button
+            onClick={() => handleNavigation('explore')}
+            className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+              currentPage === 'explore'
+                ? 'bg-blue-500/30 text-blue-300'
+                : 'text-gray-300 hover:bg-gray-800'
+            }`}
+          >
+            🔍 Explore
+          </button>
+          <button
+            onClick={() => handleNavigation('likes')}
+            className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+              currentPage === 'likes'
+                ? 'bg-blue-500/30 text-blue-300'
+                : 'text-gray-300 hover:bg-gray-800'
+            }`}
+          >
+            ❤️ Likes
+          </button>
+          <button
+            onClick={() => handleNavigation('messages')}
+            className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+              currentPage === 'messages'
+                ? 'bg-blue-500/30 text-blue-300'
+                : 'text-gray-300 hover:bg-gray-800'
+            }`}
+          >
+            💬 Messages
+          </button>
+          <button
+            onClick={() => handleNavigation('create-post')}
+            className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+              currentPage === 'create-post'
+                ? 'bg-blue-500/30 text-blue-300'
+                : 'text-gray-300 hover:bg-gray-800'
+            }`}
+          >
+            ✏️ Create
           </button>
           <button
             onClick={() => handleNavigation('about')}
@@ -296,7 +353,8 @@ function Header({ currentPage, onNavigate }) {
             </>
           )}
         </nav>
-      </div>
+        </div>
+      </>
     )}
     </>
   );

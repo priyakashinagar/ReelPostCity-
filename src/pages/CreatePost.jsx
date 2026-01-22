@@ -49,9 +49,9 @@ function CreatePost({ onNavigate }) {
       </div>
     </div>
     
-    <div className="w-full bg-gray-900 flex">
+    <div className="w-full bg-gray-900 flex flex-col lg:flex-row">
       {/* LEFT SIDEBAR */}
-      <aside className="w-64 bg-gray-950 border-r border-blue-500/70 blue-shine-border p-6 fixed left-0 h-screen overflow-y-auto z-40">
+      <aside className="hidden lg:block w-64 bg-gray-950 border-r border-blue-500/70 blue-shine-border p-6 h-screen overflow-y-auto z-40 fixed left-0 top-20 bottom-0">
         <div className="mb-8">
           <h1 className="text-2xl font-bold shine-text cursor-pointer bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent" onClick={() => onNavigate('home')}>DhvaniCast</h1>
           <p className="text-xs text-gray-500 mt-1">Explore & Share</p>
@@ -96,7 +96,7 @@ function CreatePost({ onNavigate }) {
       </aside>
 
       {/* CENTER CONTENT */}
-      <section className="flex-1 ml-64 mr-80 py-8 px-4 pb-20 bg-gray-900 blue-shine-border rounded-2xl">
+      <section className="w-full lg:flex-1 lg:ml-64 lg:mr-80 py-8 px-4 pb-20 bg-gray-900 blue-shine-border rounded-2xl">
         <div className="w-full">
           {/* Header */}
           <div className="mb-8">
@@ -279,7 +279,7 @@ function CreatePost({ onNavigate }) {
       </section>
 
       {/* RIGHT SIDEBAR */}
-      <aside className="w-80 bg-gray-950 border-l border-blue-500/70 blue-shine-border p-6 fixed right-0 h-screen overflow-y-auto z-40">
+      <aside className="hidden lg:block w-80 bg-gray-950 border-l border-blue-500/70 blue-shine-border p-6 fixed right-0 top-20 bottom-0 h-screen overflow-y-auto z-40">
         <h2 className="text-sm font-bold text-gray-300 mb-6 uppercase tracking-wider">Tips</h2>
         <div className="space-y-4 text-sm text-gray-400">
           <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">

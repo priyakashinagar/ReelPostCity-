@@ -35,9 +35,9 @@ function Explore({ onNavigate }) {
       </div>
     </div>
     
-    <div className="w-full bg-gray-900 flex">
+    <div className="w-full bg-gray-900 flex flex-col lg:flex-row">
       {/* LEFT SIDEBAR */}
-      <aside className="w-64 bg-gray-950 border-r border-blue-500/70 blue-shine-border p-6 fixed left-0 h-screen overflow-y-auto z-40">
+      <aside className="hidden lg:block w-64 bg-gray-950 border-r border-blue-500/70 blue-shine-border p-6 h-screen overflow-y-auto z-40 fixed left-0 top-20 bottom-0">
         <div className="mb-8">
           <h1 className="text-2xl font-bold shine-text cursor-pointer bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent" onClick={() => onNavigate('home')}>DhvaniCast</h1>
           <p className="text-xs text-gray-500 mt-1">Explore & Share</p>
@@ -82,7 +82,7 @@ function Explore({ onNavigate }) {
       </aside>
 
       {/* CENTER CONTENT */}
-      <section className="flex-1 ml-64 mr-80 py-8 px-4 pb-20 blue-shine-border rounded-2xl">
+      <section className="w-full lg:flex-1 lg:ml-64 lg:mr-80 py-8 px-4 pb-20 blue-shine-border rounded-2xl">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-100 mb-8">Explore Amazing Cities</h1>
           
@@ -113,7 +113,7 @@ function Explore({ onNavigate }) {
       </section>
 
       {/* RIGHT SIDEBAR - TRENDING */}
-      <aside className="w-80 bg-gray-950 border-l border-blue-500/70 blue-shine-border p-6 fixed right-0 h-screen overflow-y-auto z-40">
+      <aside className="hidden lg:block w-80 bg-gray-950 border-l border-blue-500/70 blue-shine-border p-6 fixed right-0 top-20 bottom-0 h-screen overflow-y-auto z-40">
         <h2 className="text-sm font-bold text-gray-300 mb-6 uppercase tracking-wider">Trending Tags</h2>
 
         <div className="space-y-3">

@@ -54,9 +54,9 @@ function Profile({ onNavigate }) {
       </div>
     </div>
     
-    <div className="w-full bg-gray-900 flex">
+    <div className="w-full bg-gray-900 flex flex-col lg:flex-row">
       {/* LEFT SIDEBAR */}
-      <aside className="w-64 bg-gray-950 border-r border-blue-500/70 blue-shine-border p-6 fixed left-0 h-screen overflow-y-auto z-40">
+      <aside className="hidden lg:block w-64 bg-gray-950 border-r border-blue-500/70 blue-shine-border p-6 h-screen overflow-y-auto z-40 fixed left-0 top-20 bottom-0">
         <div className="mb-8">
           <h1 className="text-2xl font-bold shine-text cursor-pointer bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent" onClick={() => onNavigate('home')}>DhvaniCast</h1>
           <p className="text-xs text-gray-500 mt-1">Explore & Share</p>
@@ -101,55 +101,55 @@ function Profile({ onNavigate }) {
       </aside>
 
       {/* CENTER CONTENT */}
-      <section className="flex-1 ml-64 mr-80 py-8 px-4 pb-20 bg-gray-900 blue-shine-border rounded-2xl">
+      <section className="w-full lg:flex-1 lg:ml-64 lg:mr-80 py-8 px-4 pb-20 bg-gray-900 blue-shine-border rounded-2xl">
         <div className="w-full">
           {/* Cover Image */}
-          <div className="relative h-56 rounded-2xl overflow-hidden mb-8 border-2 border-blue-500/30 shadow-2xl">
+          <div className="relative h-40 md:h-56 rounded-2xl overflow-hidden mb-8 border-2 border-blue-500/30 shadow-2xl">
             <img src={userProfile.coverImage} alt="cover" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
           </div>
 
           {/* Profile Header */}
-          <div className="bg-gradient-to-br from-gray-800 to-gray-750 rounded-2xl p-8 border border-gray-700 mb-8 shadow-xl">
-            <div className="flex items-end gap-6">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-750 rounded-2xl p-4 md:p-8 border border-gray-700 mb-8 shadow-xl">
+            <div className="flex flex-col md:flex-row items-start md:items-end gap-4 md:gap-6">
               <img 
                 src={userProfile.avatar} 
                 alt={userProfile.name} 
-                className="w-32 h-32 rounded-full border-4 border-blue-500 shadow-lg"
+                className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-blue-500 shadow-lg flex-shrink-0"
               />
-              <div className="flex-1">
-                <h1 className="text-4xl font-bold text-gray-100 mb-1">{userProfile.name}</h1>
-                <p className="text-blue-400 text-lg font-semibold mb-3">{userProfile.username}</p>
+              <div className="flex-1 w-full md:w-auto">
+                <h1 className="text-2xl md:text-4xl font-bold text-gray-100 mb-1">{userProfile.name}</h1>
+                <p className="text-blue-400 text-base md:text-lg font-semibold mb-3">{userProfile.username}</p>
                 <p className="text-gray-300 text-sm leading-relaxed">{userProfile.bio}</p>
               </div>
               <button 
                 onClick={() => setEditModalOpen(true)}
-                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl">
+                className="w-full md:w-auto px-4 md:px-8 py-2 md:py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl text-sm md:text-base">
                 Edit Profile
               </button>
             </div>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4 mb-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-8 md:mb-12">
             {stats.map((stat, idx) => (
-              <div key={idx} className="bg-gradient-to-br from-gray-800 to-gray-750 rounded-2xl p-6 border border-gray-700 text-center hover:border-blue-500 hover:shadow-xl transition-all group">
-                <p className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-300 bg-clip-text text-transparent">{stat.value}</p>
-                <p className="text-sm text-gray-400 mt-2 group-hover:text-gray-300 transition-colors">{stat.label}</p>
+              <div key={idx} className="bg-gradient-to-br from-gray-800 to-gray-750 rounded-xl md:rounded-2xl p-3 md:p-6 border border-gray-700 text-center hover:border-blue-500 hover:shadow-xl transition-all group">
+                <p className="text-xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-300 bg-clip-text text-transparent">{stat.value}</p>
+                <p className="text-xs md:text-sm text-gray-400 mt-1 md:mt-2 group-hover:text-gray-300 transition-colors">{stat.label}</p>
               </div>
             ))}
           </div>
 
           {/* Posts Grid */}
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-100 mb-8 flex items-center gap-2">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-100 mb-6 md:mb-8 flex items-center gap-2">
               <span>📸</span> Posts Gallery
             </h2>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
               {Array.from({ length: 8 }).map((_, idx) => (
                 <div 
                   key={idx}
-                  className="h-48 bg-gradient-to-br from-gray-800 to-gray-750 rounded-2xl border border-gray-700 hover:border-blue-500 transition-all cursor-pointer overflow-hidden group shadow-lg hover:shadow-2xl"
+                  className="h-32 md:h-48 bg-gradient-to-br from-gray-800 to-gray-750 rounded-lg md:rounded-2xl border border-gray-700 hover:border-blue-500 transition-all cursor-pointer overflow-hidden group shadow-lg hover:shadow-2xl"
                 >
                   <img 
                     src={`https://picsum.photos/300/300?random=${idx + 501}`} 
@@ -165,7 +165,7 @@ function Profile({ onNavigate }) {
       </section>
 
       {/* RIGHT SIDEBAR */}
-      <aside className="w-80 bg-gray-950 border-l border-blue-500/70 blue-shine-border p-6 fixed right-0 h-screen overflow-y-auto z-40">
+      <aside className="hidden lg:block w-80 bg-gray-950 border-l border-blue-500/70 blue-shine-border p-6 fixed right-0 top-20 bottom-0 h-screen overflow-y-auto z-40">
         <h2 className="text-sm font-bold text-gray-300 mb-6 uppercase tracking-wider">Account</h2>
         <div className="space-y-3">
           <button 
@@ -199,8 +199,8 @@ function Profile({ onNavigate }) {
 
       {/* EDIT PROFILE MODAL */}
       {editModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50">
-          <div className="bg-gray-900 rounded-2xl p-8 w-full max-w-md border border-blue-500/30 shadow-2xl">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-2xl p-6 md:p-8 w-full max-w-md border border-blue-500/30 shadow-2xl">
             <h2 className="text-2xl font-bold text-gray-100 mb-6">Edit Profile</h2>
             
             <div className="space-y-4 mb-6">
