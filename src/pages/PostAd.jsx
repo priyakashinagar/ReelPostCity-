@@ -4,6 +4,11 @@ import './CreatePost.css';
 
 function PostAd({ onNavigate }) {
   const { user } = useAuth();
+
+  const handleBack = () => {
+    onNavigate('home');
+  };
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -122,9 +127,20 @@ function PostAd({ onNavigate }) {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-black to-gray-900 pt-20 pb-10">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold shine-text mb-4">📢 Post Your Advertisement</h1>
-          <p className="text-gray-400">Reach your audience across India</p>
+        <div className="flex items-center gap-3 mb-12">
+          <button
+            onClick={handleBack}
+            className="p-2 hover:bg-gray-800 rounded-lg transition-colors text-white hover:text-blue-400 flex-shrink-0"
+            title="Go back"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div className="text-center flex-1">
+            <h1 className="text-4xl font-bold shine-text mb-4">📢 Post Your Advertisement</h1>
+            <p className="text-gray-400">Reach your audience across India</p>
+          </div>
         </div>
 
         {/* Form Card */}

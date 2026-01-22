@@ -29,7 +29,7 @@ function Home({ onNavigate }) {
           <div className="relative w-full h-screen blue-shine-border rounded-2xl">
             <MapComponent zoom={zoom} onNavigate={onNavigate} />
             {/* Zoom Controls */}
-            <div className="absolute right-4 bottom-4 sm:right-6 sm:bottom-6 flex flex-col gap-3 z-40">
+            <div className="absolute right-4 bottom-4 sm:right-6 sm:bottom-6 flex flex-col gap-3 z-50">
               <button
                 onClick={handleZoomIn}
                 className="w-12 h-12 bg-white rounded-lg shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors border border-gray-200 font-bold text-lg text-gray-700"

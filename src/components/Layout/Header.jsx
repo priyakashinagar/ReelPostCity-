@@ -193,18 +193,7 @@ function Header({ currentPage, onNavigate }) {
         
         {/* Menu Panel - Narrow width from right */}
         <div className="fixed right-0 top-14 bottom-0 w-72 bg-black/95 backdrop-blur-md z-40 md:hidden border-l border-blue-500/30 shadow-2xl overflow-y-auto">
-          {/* Close Button */}
-          <button
-            onClick={() => setMobileMenuOpen(false)}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white transition-colors"
-            title="Close menu"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          <nav className="flex flex-col p-4 pt-12 space-y-2">
+          <nav className="flex flex-col p-4 space-y-2">
           <button
             onClick={() => handleNavigation('home')}
             className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
