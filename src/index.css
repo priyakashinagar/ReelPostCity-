@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Animated blue shine for DhvaniCast text */
 .shine-text {
   position: relative;
@@ -32,9 +36,6 @@
   50% { transform: translateX(60%) skewX(-20deg); opacity: 1; }
   100% { transform: translateX(160%) skewX(-20deg); opacity: 0.7; }
 }
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 body {
   margin: 0;
