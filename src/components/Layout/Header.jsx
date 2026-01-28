@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext.jsx';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../../store/slices/authSlice';
 
 function Header({ currentPage, onNavigate }) {
-  const { user, logout } = useAuth();
+  const dispatch = useDispatch();
+  const { user } = useSelector(state => state.auth);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const getBadge = (userType) => {
     if (userType === 'premium') return '💎';
@@ -13,9 +16,10 @@ function Header({ currentPage, onNavigate }) {
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
-      logout();
+      dispatch(logout());
       onNavigate('home');
       setMobileMenuOpen(false);
+      setUserMenuOpen(false);
     }
   };
 
@@ -156,21 +160,54 @@ function Header({ currentPage, onNavigate }) {
                 )}
 
                 {/* Profile & Logout Buttons */}
-                <button
-                  onClick={() => onNavigate('profile')}
-                  className="w-9 h-9 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-md shadow-blue-400/50 hover:shadow-lg hover:shadow-blue-400/70 transition-shadow"
-                  title="Go to profile"
-                >
-                  {user.username.charAt(0).toUpperCase()}
-                </button>
+                <div className="relative group">
+                  <button
+                    className="w-9 h-9 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-md shadow-blue-400/50 hover:shadow-lg hover:shadow-blue-400/70 transition-shadow"
+                    title="User menu"
+                  >
+                    {user.username.charAt(0).toUpperCase()}
+                  </button>
 
-                <button
-                  onClick={handleLogout}
-                  className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/40 text-red-400 border border-red-500/50 rounded-lg font-bold text-xs transition"
-                  title="Logout"
-                >
-                  Logout
-                </button>
+                  {/* User Dropdown Menu - Opens on Hover */}
+                  <div className="absolute right-0 mt-2 w-48 bg-black/95 border border-blue-500/50 rounded-lg shadow-lg z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    <div className="p-3 border-b border-gray-700">
+                      <p className="text-sm font-bold text-white">{user.username}</p>
+                      <p className="text-xs text-gray-400">{user.email}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        onNavigate('profile');
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-blue-500/20 transition"
+                    >
+                      👤 Profile
+                    </button>
+                    <button
+                      onClick={() => {
+                        onNavigate('create-post');
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-blue-500/20 transition"
+                    >
+                      📝 Create Post
+                    </button>
+                    <button
+                      onClick={() => {
+                        onNavigate('subscription');
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-blue-500/20 transition"
+                    >
+                      💎 Upgrade Plan
+                    </button>
+                    <div className="border-t border-gray-700">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/20 transition"
+                      >
+                        🚪 Logout
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </>
             ) : (
               <button

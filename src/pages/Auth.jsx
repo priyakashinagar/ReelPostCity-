@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext.jsx';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser, registerUser, clearError, clearSuccess } from '../store/slices/authSlice';
 import './Auth.css';
 
 function Auth({ onNavigate }) {
+  const dispatch = useDispatch();
+  const { isLoading, error, user, isAuthenticated, successMessage } = useSelector(state => state.auth);
+  
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     username: '',
@@ -11,47 +15,54 @@ function Auth({ onNavigate }) {
     confirmPassword: '',
     userType: 'free',
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { login, register } = useAuth();
+
+  // Redirect on successful authentication
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      // Redirect to home (map page) for authenticated users
+      onNavigate('home');
+    }
+  }, [isAuthenticated, user, onNavigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    setError('');
+    if (error) dispatch(clearError());
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
 
-    try {
-      if (isLogin) {
-        // Login
-        if (!formData.email || !formData.password) {
-          throw new Error('Please fill all fields');
-        }
-        login(formData.email, formData.password);
-        onNavigate('home');
-      } else {
-        // Register
-        if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
-          throw new Error('Please fill all fields');
-        }
-        if (formData.password !== formData.confirmPassword) {
-          throw new Error('Passwords do not match');
-        }
-        if (formData.password.length < 6) {
-          throw new Error('Password must be at least 6 characters');
-        }
-        register(formData.email, formData.password, formData.username, formData.userType);
-        onNavigate('home');
+    if (isLogin) {
+      // Login validation
+      if (!formData.email || !formData.password) {
+        dispatch(clearError());
+        return;
       }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      dispatch(loginUser({
+        email: formData.email,
+        password: formData.password,
+      }));
+    } else {
+      // Register validation
+      if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
+        dispatch(clearError());
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        dispatch(clearError());
+        return;
+      }
+      if (formData.password.length < 6) {
+        dispatch(clearError());
+        return;
+      }
+      dispatch(registerUser({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        userType: formData.userType,
+      }));
     }
   };
 
@@ -69,6 +80,13 @@ function Auth({ onNavigate }) {
           {error && (
             <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg">
               <p className="text-red-300 text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {successMessage && (
+            <div className="mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded-lg">
+              <p className="text-green-300 text-sm">{successMessage}</p>
             </div>
           )}
 
@@ -161,10 +179,10 @@ function Auth({ onNavigate }) {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={isLoading}
               className="w-full py-2 px-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-lg transition disabled:opacity-50 mt-6"
             >
-              {loading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Account'}
+              {isLoading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Account'}
             </button>
           </form>
 
@@ -175,7 +193,8 @@ function Auth({ onNavigate }) {
               <button
                 onClick={() => {
                   setIsLogin(!isLogin);
-                  setError('');
+                  dispatch(clearError());
+                  dispatch(clearSuccess());
                   setFormData({
                     username: '',
                     email: '',

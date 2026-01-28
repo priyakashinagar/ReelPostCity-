@@ -1,18 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectCity, fetchFeaturedCities } from '../store/slices/citySlice.js';
+import { getAllPosts } from '../services/postService.js';
 
 function Explore({ onNavigate }) {
+  const dispatch = useDispatch();
+  const { cities, loading } = useSelector(state => state.city);
   const [selectedCity, setSelectedCity] = useState(null);
+  const [postCounts, setPostCounts] = useState({});
 
-  const exploreCities = [
-    { name: 'Amsterdam', posts: 3456, image: 'https://picsum.photos/400/300?random=201', description: 'Canals, bikes, and tulips' },
-    { name: 'Tokyo', posts: 5678, image: 'https://picsum.photos/400/300?random=202', description: 'Ancient traditions meet modern tech' },
-    { name: 'Bali', posts: 4234, image: 'https://picsum.photos/400/300?random=203', description: 'Tropical paradise and temples' },
-    { name: 'New York', posts: 6789, image: 'https://picsum.photos/400/300?random=204', description: 'The city that never sleeps' },
-    { name: 'Venice', posts: 2345, image: 'https://picsum.photos/400/300?random=205', description: 'Romance and water streets' },
-    { name: 'Delhi', posts: 4567, image: 'https://picsum.photos/400/300?random=206', description: 'History, culture, and colors' },
-    { name: 'London', posts: 5432, image: 'https://picsum.photos/400/300?random=207', description: 'Royal heritage and modern vibes' },
-    { name: 'Paris', posts: 7654, image: 'https://picsum.photos/400/300?random=208', description: 'The city of love and art' },
-  ];
+  // Fetch featured cities and calculate post counts
+  useEffect(() => {
+    dispatch(fetchFeaturedCities());
+  }, [dispatch]);
+
+  // Calculate post counts for each city
+  useEffect(() => {
+    const calculateCounts = async () => {
+      try {
+        const response = await getAllPosts();
+        const posts = response?.data || [];
+        
+        const counts = {};
+        cities.forEach(city => {
+          const cityName = city.displayName || city.name;
+          const count = posts.filter(post => {
+            const postCity = post.city || post.cityName;
+            return postCity && postCity.toLowerCase().trim() === cityName.toLowerCase().trim();
+          }).length;
+          counts[cityName] = count;
+        });
+        
+        setPostCounts(counts);
+      } catch (error) {
+        console.error('Error calculating post counts:', error);
+      }
+    };
+
+    if (cities && cities.length > 0) {
+      calculateCounts();
+    }
+  }, [cities]);
 
   const trendingTags = [
     { name: '#Travel', posts: '2.5M' },
@@ -37,16 +65,21 @@ function Explore({ onNavigate }) {
     
     <div className="w-full bg-gray-900 flex flex-col lg:flex-row">
       {/* LEFT SIDEBAR */}
-      <aside className="hidden lg:block w-64 bg-gray-950 border-r border-blue-500/70 blue-shine-border p-6 h-screen overflow-y-auto z-40 fixed left-0 top-20 bottom-0">
+      <aside className="hidden lg:block w-64 bg-gray-950 border-r border-blue-500/70 blue-shine-border p-6 h-screen overflow-y-auto z-40 fixed left-0 top-14 bottom-0 scrollbar-hide">
         <div className="mb-8">
           <h1 className="text-2xl font-bold shine-text cursor-pointer bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent" onClick={() => onNavigate('home')}>DhvaniCast</h1>
           <p className="text-xs text-gray-500 mt-1">Explore & Share</p>
         </div>
         
         <nav className="space-y-2">
-          <button onClick={() => onNavigate('posts')} className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 transition-all font-medium">
-            <span className="text-lg">■</span>
+          <button onClick={() => onNavigate('home')} className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 transition-all font-medium">
+            <span className="text-lg">🏠</span>
             <span>Home</span>
+          </button>
+          
+          <button onClick={() => onNavigate('posts')} className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 transition-all font-medium">
+            <span className="text-lg">📄</span>
+            <span>Posts</span>
           </button>
           
           <button onClick={() => alert('Search modal coming soon!')} className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 transition-all font-medium">
@@ -82,38 +115,62 @@ function Explore({ onNavigate }) {
       </aside>
 
       {/* CENTER CONTENT */}
-      <section className="w-full lg:flex-1 lg:ml-64 lg:mr-80 py-8 px-4 pb-20 blue-shine-border rounded-2xl">
+      <section className="w-full lg:flex-1 lg:ml-64 lg:mr-80 py-4 px-4 pb-20 blue-shine-border rounded-2xl">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-100 mb-8">Explore Amazing Cities</h1>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-            {exploreCities.map((city, idx) => (
-              <div 
-                key={idx}
-                onClick={() => setSelectedCity(city)}
-                className="bg-gray-800 rounded-xl overflow-hidden hover:shadow-2xl shadow-lg shadow-blue-400/20 transition-all duration-300 cursor-pointer group border border-gray-700 hover:border-blue-400/50"
-              >
-                <div className="relative h-48 overflow-hidden">
-                  <img 
-                    src={city.image} 
-                    alt={city.name} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-all"></div>
-                </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-bold text-gray-100 group-hover:text-blue-400 transition-colors">{city.name}</h3>
-                  <p className="text-sm text-gray-400 mt-1">{city.description}</p>
-                  <p className="text-xs text-gray-500 mt-3">{city.posts.toLocaleString()} posts</p>
-                </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="text-center">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mb-4"></div>
+                <p className="text-gray-400">Loading cities...</p>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+              {cities && cities.length > 0 ? (
+                cities.map((city, idx) => (
+                  <div 
+                    key={city._id || idx}
+                    onClick={() => {
+                      setSelectedCity(city);
+                      dispatch(selectCity({
+                        id: city._id,
+                        name: city.displayName || city.name,
+                        displayName: city.displayName || city.name,
+                        image: city.image,
+                        description: city.description || '',
+                        totalPosts: postCounts[city.displayName || city.name] || 0
+                      }));
+                      onNavigate('posts', null, true);
+                    }}
+                    className="bg-gray-800 rounded-xl overflow-hidden hover:shadow-2xl shadow-lg shadow-blue-400/20 transition-all duration-300 cursor-pointer group border border-gray-700 hover:border-blue-400/50"
+                  >
+                    <div className="relative h-48 overflow-hidden">
+                      <img 
+                        src={city.image || `https://picsum.photos/400/300?random=${idx}`} 
+                        alt={city.displayName || city.name} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-all"></div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-lg font-bold text-gray-100 group-hover:text-blue-400 transition-colors">{city.displayName || city.name}</h3>
+                      <p className="text-sm text-gray-400 mt-1">{city.description || 'Explore this amazing city'}</p>
+                      <p className="text-xs text-gray-500 mt-3">{(postCounts[city.displayName || city.name] || 0).toLocaleString()} posts</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400 col-span-full text-center py-8">No cities available</p>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
       {/* RIGHT SIDEBAR - TRENDING */}
-      <aside className="hidden lg:block w-80 bg-gray-950 border-l border-blue-500/70 blue-shine-border p-6 fixed right-0 top-20 bottom-0 h-screen overflow-y-auto z-40">
+      <aside className="hidden lg:block w-80 bg-gray-950 border-l border-blue-500/70 blue-shine-border p-6 fixed right-0 top-14 bottom-0 h-screen overflow-y-auto z-40 scrollbar-hide">
         <h2 className="text-sm font-bold text-gray-300 mb-6 uppercase tracking-wider">Trending Tags</h2>
 
         <div className="space-y-3">

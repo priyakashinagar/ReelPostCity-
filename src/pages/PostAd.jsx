@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useSelector } from 'react-redux';
 import './CreatePost.css';
 
 function PostAd({ onNavigate }) {
-  const { user } = useAuth();
+  const user = useSelector(state => state.auth.user);
 
   const handleBack = () => {
     onNavigate('home');
@@ -67,6 +67,11 @@ function PostAd({ onNavigate }) {
     setSuccess('');
 
     try {
+      // Check if user has permission to post ads
+      if (user?.userType !== 'premium' && user?.userType !== 'vip') {
+        throw new Error('Only Premium and VIP members can post ads. Please upgrade your plan!');
+      }
+
       if (!formData.title || !formData.description || !formData.imagePreview) {
         throw new Error('Please fill all required fields');
       }

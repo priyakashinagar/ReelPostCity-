@@ -1,5 +1,4 @@
 import React from 'react';
-import { useAuth } from '../../context/AuthContext.jsx';
 
 /**
  * ProtectedRoute - Wrapper component for routes that require authentication
@@ -11,10 +10,10 @@ function ProtectedRoute({
   requiredUserTypes = null,
   fallbackComponent: FallbackComponent = null,
   onNavigate = null,
+  user = null,
+  isAuthenticated = false,
   ...props // Pass additional props like onAddPost
 }) {
-  const { user, isAuthenticated } = useAuth();
-
   // Not authenticated - show login prompt
   if (!isAuthenticated || !user) {
     if (FallbackComponent) {

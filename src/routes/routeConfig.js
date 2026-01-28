@@ -62,6 +62,42 @@ export const routeConfig = {
       protected: false,
       showInHeader: false,
       description: 'View single post details'
+    },
+    EXPLORE: {
+      id: 'explore',
+      path: '/explore',
+      label: 'Explore',
+      type: ROUTE_TYPES.PUBLIC,
+      protected: false,
+      showInHeader: true,
+      description: 'Explore amazing cities and communities'
+    },
+    LIKES: {
+      id: 'likes',
+      path: '/likes',
+      label: 'Likes',
+      type: ROUTE_TYPES.PUBLIC,
+      protected: false,
+      showInHeader: true,
+      description: 'View liked posts (login to see your likes)'
+    },
+    MESSAGES: {
+      id: 'messages',
+      path: '/messages',
+      label: 'Messages',
+      type: ROUTE_TYPES.PUBLIC,
+      protected: false,
+      showInHeader: true,
+      description: 'Browse messages (login to send messages)'
+    },
+    SUBSCRIPTION: {
+      id: 'subscription',
+      path: '/subscription',
+      label: 'Upgrade',
+      type: ROUTE_TYPES.PUBLIC,
+      protected: false,
+      showInHeader: true,
+      description: 'View and upgrade subscription plans'
     }
   },
 
@@ -76,33 +112,6 @@ export const routeConfig = {
       showInHeader: true,
       requiresAuth: true,
       description: 'Create a new post (login required)'
-    },
-    EXPLORE: {
-      id: 'explore',
-      path: '/explore',
-      label: 'Explore',
-      type: ROUTE_TYPES.PRIVATE,
-      protected: true,
-      showInHeader: true,
-      requiresAuth: true
-    },
-    LIKES: {
-      id: 'likes',
-      path: '/likes',
-      label: 'Likes',
-      type: ROUTE_TYPES.PRIVATE,
-      protected: true,
-      showInHeader: true,
-      requiresAuth: true
-    },
-    MESSAGES: {
-      id: 'messages',
-      path: '/messages',
-      label: 'Messages',
-      type: ROUTE_TYPES.PRIVATE,
-      protected: true,
-      showInHeader: true,
-      requiresAuth: true
     },
     NOTIFICATIONS: {
       id: 'notifications',
@@ -162,35 +171,29 @@ export const routeConfig = {
 
   // PROTECTED ROUTES - Requires authentication + specific conditions
   protected: {
-    SUBSCRIPTION: {
-      id: 'subscription',
-      path: '/subscription',
-      label: 'Subscription',
-      type: ROUTE_TYPES.PROTECTED,
-      protected: true,
-      showInHeader: true,
-      requiresAuth: true,
-      requiredUserTypes: ['free', 'premium'] // VIP users shouldn't see this
-    },
+  },
+
+  // PAID FEATURES - Accessible but restricted actions
+  paidFeatures: {
     POST_AD: {
       id: 'post-ad',
       path: '/post-ad',
       label: 'Post Ad',
-      type: ROUTE_TYPES.PROTECTED,
+      type: ROUTE_TYPES.PRIVATE,
       protected: true,
       showInHeader: false,
       requiresAuth: true,
-      requiredUserTypes: ['premium', 'vip'] // Only paid users
+      description: 'Post advertisements (premium/vip only)'
     },
     MY_ADS: {
       id: 'my-ads',
       path: '/my-ads',
       label: 'My Ads',
-      type: ROUTE_TYPES.PROTECTED,
+      type: ROUTE_TYPES.PRIVATE,
       protected: true,
       showInHeader: false,
       requiresAuth: true,
-      requiredUserTypes: ['premium', 'vip'] // Only paid users
+      description: 'View your advertisements'
     }
   }
 };
@@ -202,7 +205,8 @@ export const getAllRoutes = () => {
   return {
     ...routeConfig.public,
     ...routeConfig.private,
-    ...routeConfig.protected
+    ...routeConfig.protected,
+    ...routeConfig.paidFeatures
   };
 };
 

@@ -64,11 +64,31 @@ const componentMap = {
  * Get all routes as flat object
  */
 const getAllRoutes = () => {
-  return {
-    ...routeConfig.public,
-    ...routeConfig.private,
-    ...routeConfig.protected
-  };
+  const allRoutes = {};
+  
+  // Flatten public routes by ID
+  Object.values(routeConfig.public).forEach(route => {
+    allRoutes[route.id] = route;
+  });
+  
+  // Flatten private routes by ID
+  Object.values(routeConfig.private).forEach(route => {
+    allRoutes[route.id] = route;
+  });
+  
+  // Flatten protected routes by ID
+  Object.values(routeConfig.protected).forEach(route => {
+    allRoutes[route.id] = route;
+  });
+
+  // Flatten paid features routes by ID
+  if (routeConfig.paidFeatures) {
+    Object.values(routeConfig.paidFeatures).forEach(route => {
+      allRoutes[route.id] = route;
+    });
+  }
+  
+  return allRoutes;
 };
 
 /**
@@ -121,7 +141,8 @@ export const renderRoute = (currentPage, routeProps) => {
     selectedPost,
     posts,
     onNavigate,
-    handleAddPost
+    handleAddPost,
+    fromExplore
   } = routeProps;
 
   const Component = componentMap[currentPage];
@@ -146,6 +167,7 @@ export const renderRoute = (currentPage, routeProps) => {
         post={selectedPost}
         user={user}
         posts={posts}
+        fromExplore={fromExplore}
       />
     );
   }
@@ -158,6 +180,8 @@ export const renderRoute = (currentPage, routeProps) => {
         component={Component}
         onNavigate={onNavigate}
         fallbackComponent={Auth}
+        user={user}
+        isAuthenticated={isAuthenticated}
         onAddPost={handleAddPost}
       />
     );
@@ -171,6 +195,8 @@ export const renderRoute = (currentPage, routeProps) => {
         component={Component}
         requiredUserTypes={currentRoute.requiredUserTypes}
         onNavigate={onNavigate}
+        user={user}
+        isAuthenticated={isAuthenticated}
         onAddPost={handleAddPost}
       />
     );

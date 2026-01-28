@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useSelector } from 'react-redux';
 import './Posts.css';
 
 function MyAds({ onNavigate }) {
-  const { user } = useAuth();
+  const user = useSelector(state => state.auth.user);
   const [ads, setAds] = useState([]);
   const [filter, setFilter] = useState('all'); // all, active, paused, expired
   const [loading, setLoading] = useState(true);

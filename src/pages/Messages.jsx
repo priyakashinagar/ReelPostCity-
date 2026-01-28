@@ -1,53 +1,230 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { io } from 'socket.io-client';
+import { messagesAPI, usersAPI } from '../services/api.js';
 
 function Messages({ onNavigate }) {
-  const initialChats = [
-    { id: 1, name: 'Sarah Wilson', avatar: 'https://i.pravatar.cc/150?img=10', lastMessage: 'That sunset was amazing!', time: '2 hours ago', unread: 0 },
-    { id: 2, name: 'Marcus Chen', avatar: 'https://i.pravatar.cc/150?img=11', lastMessage: 'Let me share the ramen spot', time: '3 hours ago', unread: 2 },
-    { id: 3, name: 'Lisa Wong', avatar: 'https://i.pravatar.cc/150?img=12', lastMessage: 'Thanks for the tips!', time: '5 hours ago', unread: 0 },
-    { id: 4, name: 'David Park', avatar: 'https://i.pravatar.cc/150?img=13', lastMessage: 'NYC is incredible', time: '6 hours ago', unread: 1 },
-    { id: 5, name: 'Elena Russo', avatar: 'https://i.pravatar.cc/150?img=14', lastMessage: 'Venice is on my list now', time: '8 hours ago', unread: 0 },
-  ];
-
-  const [chats, setChats] = useState(initialChats);
+  const user = useSelector(state => state.auth.user);
+  const [socket, setSocket] = useState(null);
+  const [chats, setChats] = useState([]);
+  const [loadingChats, setLoadingChats] = useState(false);
   const [selectedChat, setSelectedChat] = useState(null);
   const [messageInput, setMessageInput] = useState('');
-  const [chatMessages, setChatMessages] = useState({
-    1: [{ id: 1, sender: 'them', text: 'That sunset was amazing!', time: '2 hours ago' }],
-    2: [{ id: 1, sender: 'them', text: 'Let me share the ramen spot', time: '3 hours ago' }],
-    3: [{ id: 1, sender: 'them', text: 'Thanks for the tips!', time: '5 hours ago' }],
-    4: [{ id: 1, sender: 'them', text: 'NYC is incredible', time: '6 hours ago' }],
-    5: [{ id: 1, sender: 'them', text: 'Venice is on my list now', time: '8 hours ago' }],
-  });
+  const [chatMessages, setChatMessages] = useState({});
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const [activeUsers, setActiveUsers] = useState(new Set());
 
-  const handleSendMessage = () => {
+  // Fetch users for chat when component loads
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchUsers = async () => {
+      setLoadingChats(true);
+      try {
+        const response = await usersAPI.getUsersForChat();
+        const users = response.data || [];
+        // Add avatar URLs if not present
+        const usersWithAvatar = users.map((u, idx) => ({
+          ...u,
+          avatar: u.profilePicture || `https://i.pravatar.cc/150?img=${idx}`,
+          isActive: activeUsers.has(u._id) // Check if user is in active set
+        }));
+        setChats(usersWithAvatar);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        setChats([]);
+      } finally {
+        setLoadingChats(false);
+      }
+    };
+    
+    fetchUsers();
+  }, [user, activeUsers]);
+
+  // Socket.io setup for realtime chat
+  useEffect(() => {
+    if (!user) return;
+    
+    const SOCKET_URL = 'https://api.dhvanicast.com';
+    const newSocket = io(SOCKET_URL, {
+      auth: { userId: user._id || user.id },
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5
+    });
+
+    newSocket.on('connect', () => {
+      console.log('✅ Connected to chat server');
+      // Join personal room
+      newSocket.emit('join', user._id || user.id);
+      console.log('📍 Joined room:', user._id || user.id);
+    });
+
+    // Receive list of all currently active users
+    newSocket.on('active_users_list', (data) => {
+      console.log('📨 Received active users list:', data.users);
+      const usersSet = new Set(data.users);
+      setActiveUsers(usersSet);
+      // Update chats with active status
+      setChats(prev => prev.map(chat => ({
+        ...chat,
+        isActive: usersSet.has(chat._id)
+      })));
+    });
+
+    // Real-time message received - update UI instantly
+    newSocket.on('receive_message', (data) => {
+      console.log('📨 Real-time message received:', data);
+      
+      // Message key should be the sender's ID (to match the conversation)
+      const conversationKey = data.sender;
+      
+      // Update messages for this conversation
+      setChatMessages(prev => ({
+        ...prev,
+        [conversationKey]: [...(prev[conversationKey] || []), {
+          id: data._id || Date.now(),
+          sender: 'them',
+          text: data.content,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }]
+      }));
+      
+      // If this message is from the current selected chat, scroll to bottom
+      if (selectedChat && selectedChat._id === data.sender) {
+        setTimeout(() => {
+          const messagesContainer = document.querySelector('[data-messages-container]');
+          if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        }, 100);
+      }
+    });
+
+    // Typing indicator
+    newSocket.on('user_typing', (data) => {
+      console.log('✍️ User typing:', data.userName);
+    });
+
+    // User comes online
+    newSocket.on('user_online', (data) => {
+      console.log('🟢 User online:', data.userId);
+      setActiveUsers(prev => new Set([...prev, data.userId]));
+      // Update chats to show this user as active
+      setChats(prev => prev.map(chat => 
+        chat._id === data.userId ? { ...chat, isActive: true } : chat
+      ));
+    });
+
+    // Message delivered confirmation
+    newSocket.on('message_delivered', (data) => {
+      console.log('✓ Message delivered:', data.messageId);
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('❌ Disconnected from chat server');
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+    });
+
+    setSocket(newSocket);
+    return () => {
+      newSocket.off('active_users_list');
+      newSocket.off('receive_message');
+      newSocket.off('user_online');
+      newSocket.off('user_typing');
+      newSocket.off('message_delivered');
+      newSocket.disconnect();
+    };
+  }, [user, selectedChat]);
+
+  // Load messages when chat is selected
+  const handleSelectChat = async (chat) => {
+    setSelectedChat(chat);
+    setLoadingMessages(true);
+
+    try {
+      const response = await messagesAPI.getMessages(chat._id);
+      const messages = response.data || [];
+      
+      setChatMessages(prev => ({
+        ...prev,
+        [chat._id]: messages.map(msg => ({
+          id: msg._id,
+          sender: msg.sender._id === user._id ? 'you' : 'them',
+          text: msg.content,
+          time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }))
+      }));
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      setChatMessages(prev => ({
+        ...prev,
+        [chat._id]: []
+      }));
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedChat) return;
 
-    const newMessage = {
-      id: Date.now(),
-      sender: 'you',
-      text: messageInput,
-      time: 'now',
-    };
+    setSendingMessage(true);
+    console.log('📤 Sending message...');
+    console.log('From:', user._id, 'To:', selectedChat._id);
+    console.log('Socket connected:', socket?.connected);
+    
+    try {
+      // Send via API to save to DB
+      const apiResponse = await messagesAPI.sendMessage({
+        receiver: selectedChat._id,
+        content: messageInput
+      });
+      console.log('✅ Message saved to DB:', apiResponse.data);
 
-    setChatMessages(prev => ({
-      ...prev,
-      [selectedChat.id]: [...(prev[selectedChat.id] || []), newMessage]
-    }));
+      // Send via socket for realtime delivery
+      if (socket && socket.connected) {
+        socket.emit('send_message', {
+          sender: user._id || user.id,
+          receiver: selectedChat._id,
+          content: messageInput,
+          _id: apiResponse.data?._id
+        });
+        console.log('✅ Message sent via Socket.io');
+      }
 
-    setChats(prev => prev.map(chat => 
-      chat.id === selectedChat.id 
-        ? { ...chat, lastMessage: messageInput, time: 'just now', unread: 0 }
-        : chat
-    ));
+      const newMessage = {
+        id: Date.now(),
+        sender: 'you',
+        text: messageInput,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
 
-    setSelectedChat(prev => ({
-      ...prev,
-      lastMessage: messageInput,
-      time: 'just now'
-    }));
+      setChatMessages(prev => ({
+        ...prev,
+        [selectedChat._id]: [...(prev[selectedChat._id] || []), newMessage]
+      }));
 
-    setMessageInput('');
+      // Update last message in chat list
+      setChats(prev => prev.map(chat => 
+        chat._id === selectedChat._id 
+          ? { ...chat, lastMessage: messageInput, time: 'just now' }
+          : chat
+      ));
+
+      setMessageInput('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Failed to send message');
+    } finally {
+      setSendingMessage(false);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -59,7 +236,20 @@ function Messages({ onNavigate }) {
 
   return (
     <>
-    {/* Mobile Top Bar with DhvaniCast Logo */}
+    {!user ? (
+      <div className="w-full h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-white mb-4">Please log in to access messages</h2>
+          <button 
+            onClick={() => onNavigate('auth')}
+            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    ) : (
+    <>
     <div className="lg:hidden sticky top-0 z-40 bg-black/70 backdrop-blur-md border-b border-gray-800/50 px-4 py-3 flex items-center justify-between">
       <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => onNavigate('home')}>
         <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center shadow-xl">
@@ -71,16 +261,21 @@ function Messages({ onNavigate }) {
     
     <div className="w-full bg-gray-900 flex flex-col lg:flex-row">
       {/* LEFT SIDEBAR */}
-      <aside className="hidden lg:block w-64 bg-gray-950 border-r border-blue-500/70 blue-shine-border p-6 h-screen overflow-y-auto z-40 fixed left-0 top-20 bottom-0">
+      <aside className="hidden lg:block w-64 bg-gray-950 border-r border-blue-500/70 blue-shine-border p-6 h-screen overflow-y-auto z-40 fixed left-0 top-14 bottom-0 scrollbar-hide">
         <div className="mb-8">
           <h1 className="text-2xl font-bold shine-text cursor-pointer bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent" onClick={() => onNavigate('home')}>DhvaniCast</h1>
           <p className="text-xs text-gray-500 mt-1">Explore & Share</p>
         </div>
         
         <nav className="space-y-2">
-          <button onClick={() => onNavigate('posts')} className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 transition-all font-medium">
-            <span className="text-lg">■</span>
+          <button onClick={() => onNavigate('home')} className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 transition-all font-medium">
+            <span className="text-lg">🏠</span>
             <span>Home</span>
+          </button>
+          
+          <button onClick={() => onNavigate('posts')} className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 transition-all font-medium">
+            <span className="text-lg">📄</span>
+            <span>Posts</span>
           </button>
           
           <button onClick={() => alert('Search modal coming soon!')} className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 transition-all font-medium">
@@ -116,42 +311,47 @@ function Messages({ onNavigate }) {
       </aside>
 
       {/* CENTER CONTENT */}
-      <section className="w-full lg:flex-1 lg:ml-64 lg:mr-80 py-8 px-4 pb-20 bg-gray-900 blue-shine-border rounded-2xl">
+      <section className="w-full lg:flex-1 lg:ml-64 lg:mr-80 py-4 px-4 pb-20 bg-gray-900 blue-shine-border rounded-2xl">
         <div className="w-full">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gray-100 mb-2">✉ Messages</h1>
             <p className="text-gray-400">Stay connected with your followers</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {chats.map((chat) => (
-              <div 
-                key={chat.id}
-                className="bg-gradient-to-br from-gray-800 to-gray-750 rounded-2xl p-5 border border-gray-700 shadow-lg shadow-blue-400/20 hover:border-blue-400/50 hover:shadow-blue-400/40 transition-all hover:bg-gradient-to-br hover:from-gray-700 hover:to-gray-650 group"
-              >
-                <div className="flex items-start gap-4">
-                  <img src={chat.avatar} alt={chat.name} className="w-14 h-14 rounded-full border-2 border-blue-500/50 group-hover:border-blue-400" />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-gray-100 font-bold text-lg group-hover:text-blue-400 transition-colors">{chat.name}</p>
-                      <span className="text-xs text-gray-500">{chat.time}</span>
-                    </div>
-                    <p className="text-sm text-gray-400 line-clamp-2">{chat.lastMessage}</p>
-                    <div className="flex items-center gap-2 mt-3">
-                      <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                      <span className="text-xs text-gray-500">Active now</span>
+          {loadingChats ? (
+            <div className="flex justify-center items-center h-40">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </div>
+          ) : chats.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400 text-lg">No users available for chat</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {chats.map((chat) => (
+                <div 
+                  key={chat._id}
+                  className="bg-gradient-to-br from-gray-800 to-gray-750 rounded-2xl p-5 border border-gray-700 shadow-lg shadow-blue-400/20 hover:border-blue-400/50 hover:shadow-blue-400/40 transition-all hover:bg-gradient-to-br hover:from-gray-700 hover:to-gray-650 group cursor-pointer"
+                  onClick={() => handleSelectChat(chat)}
+                >
+                  <div className="flex items-start gap-4">
+                    <img src={chat.avatar} alt={chat.name} className="w-14 h-14 rounded-full border-2 border-blue-500/50 group-hover:border-blue-400" />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-gray-100 font-bold text-lg group-hover:text-blue-400 transition-colors">{chat.name}</p>
+                        <span className="text-xs text-gray-500">{chat.time || 'now'}</span>
+                      </div>
+                      <p className="text-sm text-gray-400 line-clamp-2">{chat.email || ''}</p>
+                      <div className="flex items-center gap-2 mt-3">
+                        <div className={`h-2 w-2 rounded-full transition-colors ${chat.isActive ? 'bg-green-500' : 'bg-gray-600'}`}></div>
+                        <span className="text-xs text-gray-500">{chat.isActive ? '🟢 Active now' : '⚫ Offline'}</span>
+                      </div>
                     </div>
                   </div>
-                  {chat.unread > 0 && (
-                    <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                      {chat.unread}
-                    </div>
-                  )}
-                </div>
-                {/* Mobile chat button */}
+                  {/* Mobile chat button */}
                 <button
                   className="lg:hidden mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 rounded-lg transition-all"
-                  onClick={() => setSelectedChat(chat)}
+                  onClick={() => handleSelectChat(chat)}
                 >
                   Chat Now
                 </button>
@@ -163,12 +363,13 @@ function Messages({ onNavigate }) {
                 />
               </div>
             ))}
-          </div>
+            </div>
+          )}
         </div>
       </section>
 
       {/* RIGHT SIDEBAR */}
-      <aside className="hidden lg:flex w-80 bg-gray-950 border-l border-blue-500/70 blue-shine-border p-6 fixed right-0 top-20 bottom-0 h-screen overflow-y-auto z-40 flex-col">
+      <aside className="hidden lg:flex w-80 bg-gray-950 border-l border-blue-500/70 blue-shine-border p-6 fixed right-0 top-14 bottom-0 h-screen overflow-y-auto z-40 flex-col scrollbar-hide">
         <h2 className="text-sm font-bold text-gray-300 mb-6 uppercase tracking-wider">Conversation</h2>
         {selectedChat ? (
           <div className="flex flex-col h-full">
@@ -176,21 +377,29 @@ function Messages({ onNavigate }) {
               <img src={selectedChat.avatar} alt={selectedChat.name} className="w-10 h-10 rounded-full" />
               <div>
                 <p className="font-semibold text-gray-100">{selectedChat.name}</p>
-                <p className="text-xs text-gray-500">Active now</p>
+                <p className="text-xs text-gray-500">{selectedChat.isActive ? '🟢 Active now' : '⚫ Offline'}</p>
               </div>
             </div>
             
-            <div className="flex-1 overflow-y-auto mb-4 space-y-3 pr-2">
-              {(chatMessages[selectedChat.id] || []).map((msg) => (
-                <div key={msg.id} className={`flex ${msg.sender === 'you' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-xs rounded-lg p-3 ${msg.sender === 'you' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-800 border border-gray-700 text-gray-300'}`}>
-                    <p className="text-sm">{msg.text}</p>
-                    <p className={`text-xs mt-1 ${msg.sender === 'you' ? 'text-blue-200' : 'text-gray-500'}`}>{msg.time}</p>
-                  </div>
+            <div className="flex-1 overflow-y-auto mb-4 space-y-3 pr-2" data-messages-container>
+              {loadingMessages ? (
+                <div className="flex justify-center items-center h-32">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                 </div>
-              ))}
+              ) : (
+                <>
+                  {(chatMessages[selectedChat._id] || []).map((msg) => (
+                    <div key={msg.id} className={`flex ${msg.sender === 'you' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-xs rounded-lg p-3 ${msg.sender === 'you' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-800 border border-gray-700 text-gray-300'}`}>
+                        <p className="text-sm">{msg.text}</p>
+                        <p className={`text-xs mt-1 ${msg.sender === 'you' ? 'text-blue-200' : 'text-gray-500'}`}>{msg.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
             
             <div className="space-y-2 flex-shrink-0">
@@ -199,15 +408,16 @@ function Messages({ onNavigate }) {
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-500 resize-none" 
+                disabled={sendingMessage}
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-500 resize-none disabled:opacity-50" 
                 rows="3"
               />
               <button 
                 onClick={handleSendMessage}
-                disabled={!messageInput.trim()}
+                disabled={!messageInput.trim() || sendingMessage}
                 className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm font-semibold py-2 rounded-lg transition-all"
               >
-                Send Message
+                {sendingMessage ? 'Sending...' : 'Send Message'}
               </button>
             </div>
           </div>
@@ -218,7 +428,7 @@ function Messages({ onNavigate }) {
 
       {/* MOBILE CHAT MODAL - Shows full screen chat on mobile */}
       {selectedChat && (
-        <div className="lg:hidden fixed inset-0 bg-gray-900 z-50 flex flex-col top-20">
+        <div className="lg:hidden fixed inset-0 bg-gray-900 z-50 flex flex-col top-14">
           {/* Chat Header */}
           <div className="bg-black/70 backdrop-blur-md border-b border-gray-800/50 px-4 py-3 flex items-center gap-3 flex-shrink-0">
             <button
@@ -233,22 +443,28 @@ function Messages({ onNavigate }) {
             <img src={selectedChat.avatar} alt={selectedChat.name} className="w-10 h-10 rounded-full" />
             <div>
               <p className="font-semibold text-gray-100 text-sm">{selectedChat.name}</p>
-              <p className="text-xs text-gray-500">Active now</p>
+              <p className="text-xs text-gray-500">{selectedChat.isActive ? '🟢 Active now' : '⚫ Offline'}</p>
             </div>
           </div>
           
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {(chatMessages[selectedChat.id] || []).map((msg) => (
-              <div key={msg.id} className={`flex ${msg.sender === 'you' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-xs rounded-lg p-3 ${msg.sender === 'you' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-800 border border-gray-700 text-gray-300'}`}>
-                  <p className="text-sm">{msg.text}</p>
-                  <p className={`text-xs mt-1 ${msg.sender === 'you' ? 'text-blue-200' : 'text-gray-500'}`}>{msg.time}</p>
-                </div>
+            {loadingMessages ? (
+              <div className="flex justify-center items-center h-32">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
               </div>
-            ))}
+            ) : (
+              (chatMessages[selectedChat._id] || []).map((msg) => (
+                <div key={msg.id} className={`flex ${msg.sender === 'you' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-xs rounded-lg p-3 ${msg.sender === 'you' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-800 border border-gray-700 text-gray-300'}`}>
+                    <p className="text-sm">{msg.text}</p>
+                    <p className={`text-xs mt-1 ${msg.sender === 'you' ? 'text-blue-200' : 'text-gray-500'}`}>{msg.time}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
           
           {/* Message Input */}
@@ -258,20 +474,23 @@ function Messages({ onNavigate }) {
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-500 resize-none" 
+              disabled={sendingMessage}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-500 resize-none disabled:opacity-50" 
               rows="3"
             />
             <button 
               onClick={handleSendMessage}
-              disabled={!messageInput.trim()}
+              disabled={!messageInput.trim() || sendingMessage}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm font-semibold py-2 rounded-lg transition-all"
             >
-              Send Message
+              {sendingMessage ? 'Sending...' : 'Send Message'}
             </button>
           </div>
         </div>
       )}
     </div>
+    </>
+    )}
     </>
   );
 }

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import './Subscription.css';
 
 function Subscription({ onNavigate }) {
+  const { user, isAuthenticated } = useSelector(state => state.auth);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentForm, setPaymentForm] = useState({
@@ -43,10 +45,11 @@ function Subscription({ onNavigate }) {
         '✓ View 500 posts/day',
         '✓ 50% fewer ads',
         '✓ Priority support',
+        '✓ FREE for 2 months! 🎉',
       ],
-      badge: 'POPULAR',
+      badge: 'FREE FOR 2 MONTHS',
       color: 'from-blue-400 to-blue-600',
-      buttonText: 'Upgrade to Premium',
+      buttonText: 'Claim Free Trial',
       buttonClass: 'bg-blue-500 hover:bg-blue-600',
     },
     {
@@ -61,16 +64,31 @@ function Subscription({ onNavigate }) {
         '✓ Unlimited posts',
         '✓ No ads at all',
         '✓ VIP support 24/7',
+        '✓ FREE for 2 months! 🎉',
       ],
-      badge: 'BEST VALUE',
+      badge: 'FREE FOR 2 MONTHS',
       color: 'from-yellow-400 to-yellow-600',
-      buttonText: 'Go Pro',
+      buttonText: 'Claim Free Trial',
       buttonClass: 'bg-yellow-500 hover:bg-yellow-600',
     },
   ];
 
   const handleUpgrade = (planId) => {
     if (planId !== 'free') {
+      // Check if user is logged in
+      if (!isAuthenticated || !user) {
+        alert('Please login or register first to upgrade your plan');
+        onNavigate('auth');
+        return;
+      }
+      
+      // For free trial plans
+      if (planId === 'premium' || planId === 'pro') {
+        const trialMessage = `🎉 Congratulations!\n\nYou've been activated for ${planId.toUpperCase()} plan for FREE for 2 months!\n\nAfter 2 months, you'll be charged:\n${planId === 'premium' ? '₹99/month' : '₹299/month'}\n\nYou'll receive a reminder before billing starts.`;
+        alert(trialMessage);
+        return;
+      }
+      
       setSelectedPlan(planId);
       setPaymentModalOpen(true);
     }

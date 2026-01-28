@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import { useDispatch, useSelector } from 'react-redux';
+import { verifyToken } from './store/slices/authSlice.js';
 import Header from './components/Layout/Header.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
+import { CityProvider } from './context/CityContext.jsx';
 import {
   validateRouteAccess,
   renderRoute,
@@ -9,10 +12,12 @@ import {
 } from './routes/index.js';
 
 function AppContent() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const dispatch = useDispatch();
+  const { user, isAuthenticated, isLoading } = useSelector(state => state.auth);
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedPost, setSelectedPost] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [fromExplore, setFromExplore] = useState(false);
 
   // Initialize posts with timestamps
   useEffect(() => {
@@ -74,8 +79,9 @@ function AppContent() {
   }
 
   // Handlers for navigation and post operations
-  const handleNavigate = (page, post = null) => {
+  const handleNavigate = (page, post = null, navigateFromExplore = false) => {
     setCurrentPage(page);
+    setFromExplore(navigateFromExplore);
     if (post) {
       setSelectedPost(post);
     }
@@ -101,7 +107,8 @@ function AppContent() {
     selectedPost,
     posts,
     onNavigate: handleNavigate,
-    handleAddPost
+    handleAddPost,
+    fromExplore
   };
 
   return (
@@ -118,10 +125,19 @@ function AppContent() {
 }
 
 function App() {
+  const dispatch = useDispatch();
+
+  // Verify token on app load
+  useEffect(() => {
+    dispatch(verifyToken());
+  }, [dispatch]);
+
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ErrorBoundary>
+      <CityProvider>
+        <AppContent />
+      </CityProvider>
+    </ErrorBoundary>
   );
 }
 
