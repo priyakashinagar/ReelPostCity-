@@ -1,7 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API_URL = 'https://api.dhvanicast.com/api/users';
+// Use environment variable for API URL
+const API_URL = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/users`
+  : 'http://localhost:5000/api/users';
 
 // Normalize user object from backend format to frontend format
 const normalizeUser = (user) => ({

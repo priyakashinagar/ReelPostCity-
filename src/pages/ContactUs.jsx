@@ -55,7 +55,23 @@ function ContactUs() {
       }
     } catch (err) {
       console.error('Error submitting contact form:', err);
-      setError(err.message || 'Failed to submit form. Please try again.');
+      
+      // Handle different types of errors
+      let errorMessage = 'Failed to submit form. Please try again.';
+      
+      if (err.code === 'ECONNABORTED') {
+        errorMessage = 'Request timeout. The server is not responding. Please check your connection or try again later.';
+      } else if (err.response?.status === 400) {
+        errorMessage = err.response?.data?.message || 'Invalid form data. Please check your inputs.';
+      } else if (err.response?.status === 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (err.message?.includes('timeout')) {
+        errorMessage = 'Request took too long. Please check your connection and try again.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

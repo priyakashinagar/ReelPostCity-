@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://api.dhvanicast.com/api/ads';
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/ads`;
 
 // Create a new ad
 export const createAd = async (adData, token) => {

@@ -49,9 +49,9 @@ function Messages({ onNavigate }) {
   useEffect(() => {
     if (!user) return;
     
-    const SOCKET_URL = process.env.NODE_ENV === 'production' 
-      ? 'https://api.dhvanicast.com'
-      : 'https://api.dhvanicast.com';
+    const SOCKET_URL = import.meta.env.VITE_API_URL 
+      ? import.meta.env.VITE_API_URL.replace('/api', '')
+      : 'http://localhost:5000';
     
     const newSocket = io(SOCKET_URL, {
       auth: { userId: user._id || user.id },

@@ -302,7 +302,7 @@ function Posts({ onNavigate, userType, fromExplore }) {
   const trackPostView = async (postId) => {
     try {
       // TODO: Call backend to increment view count
-      // await axios.post(`http://localhost:5000/api/posts/${postId}/view`);
+      // await api.post(`/posts/${postId}/view`);
       console.log('View tracked for post:', postId);
     } catch (error) {
       console.error('Error tracking view:', error);

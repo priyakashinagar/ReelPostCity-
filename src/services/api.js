@@ -3,11 +3,11 @@ import axios from 'axios';
 // Create axios instance with default configuration
 const API_BASE_URL = import.meta.env.PROD 
   ? (import.meta.env.VITE_API_URL || 'https://api.dhvanicast.com/api')
-  : (import.meta.env.VITE_API_LOCAL_URL || 'http://localhost:5000/api');
+  : (import.meta.env.VITE_API_LOCAL_URL || 'https://api.dhvanicast.com/api');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 30000, // Increased to 30 seconds for better reliability
   headers: {
     'Content-Type': 'application/json',
   },

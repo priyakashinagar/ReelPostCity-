@@ -5,6 +5,9 @@ import { fetchFeaturedCities, selectCity } from '../store/slices/citySlice';
 import axios from 'axios';
 import postService from '../services/postService.js';
 
+// Get API URL from environment
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 // Load Leaflet CSS from CDN - Only once
 if (!document.querySelector('link[href*="leaflet.min.css"]')) {
   const link = document.createElement('link');
@@ -44,21 +47,24 @@ function MapComponent({ zoom = 3, onNavigate }) {
       const posts = allPosts.data || allPosts;
       
       console.log('Fetched posts:', posts.length, 'posts total');
-      console.log('First few posts:', posts.slice(0, 3).map(p => ({ city: p.city, cityName: p.cityName, type: p.type })));
       
       const counts = {};
       citiesData.forEach(city => {
-        // Try matching with city.name or city.displayName
-        const cityNameToMatch = city.displayName || city.name;
+        // Count posts for this city by cityId
         const cityPostCount = posts.filter(post => {
-          // Check both 'city' and 'cityName' fields
-          const postCity = post.city || post.cityName;
-          if (!postCity) return false;
-          // Case-insensitive match
-          return postCity.toLowerCase().trim() === cityNameToMatch.toLowerCase().trim();
+          // Match by cityId (most reliable)
+          if (post.cityId && city.id && post.cityId === city.id) {
+            return true;
+          }
+          // Fallback: match by city name
+          const postCityName = post.city || post.cityName || '';
+          const cityName = city.displayName || city.name || '';
+          return postCityName.toLowerCase().trim() === cityName.toLowerCase().trim();
         }).length;
-        counts[cityNameToMatch] = cityPostCount;
-        console.log(`City: ${cityNameToMatch} → ${cityPostCount} posts`);
+        
+        const displayName = city.displayName || city.name;
+        counts[displayName] = cityPostCount;
+        console.log(`City: ${displayName} (ID: ${city.id}) → ${cityPostCount} posts`);
       });
       
       console.log('Final post counts by city:', counts);
@@ -96,7 +102,7 @@ function MapComponent({ zoom = 3, onNavigate }) {
     }
     
     try {
-      const response = await axios.get(`https://api.dhvanicast.com/api/cities/${cityId}/sub-cities`);
+      const response = await axios.get(`${API_BASE_URL}/cities/${cityId}/sub-cities`);
       const subCities = response.data.data || [];
       setSubCitiesData(prev => ({
         ...prev,
