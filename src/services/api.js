@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 // Create axios instance with default configuration
-const API_BASE_URL = 'https://api.dhvanicast.com/api';
+const API_BASE_URL = import.meta.env.PROD 
+  ? (import.meta.env.VITE_API_URL || 'https://api.dhvanicast.com/api')
+  : (import.meta.env.VITE_API_LOCAL_URL || 'http://localhost:5000/api');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -134,6 +136,33 @@ export const messagesAPI = {
   
   // Send a message
   sendMessage: (data) => api.post('/messages', data),
+  
+  // Update a message
+  updateMessage: (id, data) => api.put(`/messages/${id}`, data),
+  
+  // Delete a message
+  deleteMessage: (id) => api.delete(`/messages/${id}`),
+};
+
+// ============= CONTACT US API =============
+export const contactAPI = {
+  // Submit contact form
+  submitContact: (data) => api.post('/contacts', data),
+  
+  // Get all contacts (admin)
+  getAllContacts: (params) => api.get('/contacts', { params }),
+  
+  // Get contact by ID
+  getContactById: (id) => api.get(`/contacts/${id}`),
+  
+  // Update contact (admin)
+  updateContact: (id, data) => api.put(`/contacts/${id}`, data),
+  
+  // Delete contact (admin)
+  deleteContact: (id) => api.delete(`/contacts/${id}`),
+  
+  // Get contact statistics (admin)
+  getContactStats: () => api.get('/contacts/stats'),
 };
 
 export default api;

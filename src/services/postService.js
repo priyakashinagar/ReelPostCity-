@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api/posts';
+const API_BASE_URL = 'https://api.dhvanicast.com/api/posts';
 
 // Configure axios instance
 const apiClient = axios.create({

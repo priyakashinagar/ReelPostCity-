@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import MapComponent from '../components/MapComponent.jsx';
+import { contactAPI } from '../services/api.js';
 
 function ContactUs() {
+  const user = useSelector(state => state.auth?.user);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
+    name: '',
+    email: user?.email || '',
     subject: '',
-    message: ''
+    message: '',
+    category: 'support'
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -17,16 +23,42 @@ function ContactUs() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('Message sent successfully! We will get back to you soon.');
-    setFormData({
-      firstName: '',
-      lastName: '',
-      email: '',
-      subject: '',
-      message: ''
-    });
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      // Validate form
+      if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+        setError('Please fill out all fields');
+        setLoading(false);
+        return;
+      }
+
+      // Submit to backend
+      const response = await contactAPI.submitContact(formData);
+      
+      if (response.success) {
+        setSuccess(true);
+        setFormData({
+          name: '',
+          email: user?.email || '',
+          subject: '',
+          message: '',
+          category: 'support'
+        });
+        
+        // Clear success message after 5 seconds
+        setTimeout(() => setSuccess(false), 5000);
+      }
+    } catch (err) {
+      console.error('Error submitting contact form:', err);
+      setError(err.message || 'Failed to submit form. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -49,33 +81,33 @@ function ContactUs() {
               <h2 className="text-2xl font-bold bg-linear-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2">Send Your Inquiry</h2>
               <p className="text-gray-400 mb-8">Please fill out the form below to send your inquiry.</p>
               
+              {/* Success Message */}
+              {success && (
+                <div className="mb-4 p-4 bg-green-900/30 border border-green-500 rounded-lg text-green-400">
+                  ✅ Thank you for your message! We will get back to you soon.
+                </div>
+              )}
+              
+              {/* Error Message */}
+              {error && (
+                <div className="mb-4 p-4 bg-red-900/30 border border-red-500 rounded-lg text-red-400">
+                  ❌ {error}
+                </div>
+              )}
+              
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Name Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-white mb-2">First Name</label>
-                    <input
-                      type="text"
-                      name="firstName"
-                      className="w-full bg-gray-700 border border-blue-500 text-white rounded-lg px-4 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md shadow-blue-500/30"
-                      placeholder="John"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-white mb-2">Last Name</label>
-                    <input
-                      type="text"
-                      name="lastName"
-                      className="w-full bg-gray-700 border border-blue-500 text-white rounded-lg px-4 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md shadow-blue-500/30"
-                      placeholder="Doe"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
+                {/* Name */}
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Full Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    className="w-full bg-gray-700 border border-blue-500 text-white rounded-lg px-4 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md shadow-blue-500/30"
+                    placeholder="John Doe"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                  />
                 </div>
 
                 {/* Email */}
@@ -90,6 +122,23 @@ function ContactUs() {
                     onChange={handleChange}
                     required
                   />
+                </div>
+
+                {/* Category */}
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Category</label>
+                  <select
+                    name="category"
+                    className="w-full bg-gray-700 border border-blue-500 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md shadow-blue-500/30"
+                    value={formData.category}
+                    onChange={handleChange}
+                  >
+                    <option value="support">Support</option>
+                    <option value="bug_report">Bug Report</option>
+                    <option value="feature_request">Feature Request</option>
+                    <option value="feedback">Feedback</option>
+                    <option value="other">Other</option>
+                  </select>
                 </div>
 
                 {/* Subject */}
@@ -121,10 +170,11 @@ function ContactUs() {
                 </div>
 
                 <button 
-                  type="submit" 
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all border border-blue-500 shadow-lg shadow-blue-500/50 hover:shadow-blue-400/70"
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg transition-all border border-blue-500 shadow-lg shadow-blue-500/50 hover:shadow-blue-400/70"
                 >
-                  Send Message
+                  {loading ? 'Sending...' : 'Send Message'}
                 </button>
               </form>
             </div>

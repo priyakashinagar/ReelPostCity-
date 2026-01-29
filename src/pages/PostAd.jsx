@@ -67,9 +67,9 @@ function PostAd({ onNavigate }) {
     setSuccess('');
 
     try {
-      // Check if user has permission to post ads
-      if (user?.userType !== 'premium' && user?.userType !== 'vip') {
-        throw new Error('Only Premium and VIP members can post ads. Please upgrade your plan!');
+      // Check if user is logged in
+      if (!user) {
+        throw new Error('Please login first to post ads');
       }
 
       if (!formData.title || !formData.description || !formData.imagePreview) {
@@ -87,8 +87,8 @@ function PostAd({ onNavigate }) {
       // Create ad object
       const newAd = {
         id: Date.now(),
-        userId: user.id,
-        userName: user.username,
+        userId: user._id || user.id || Date.now(),
+        userName: user.username || user.name,
         userEmail: user.email,
         ...formData,
         createdAt: new Date().toISOString(),

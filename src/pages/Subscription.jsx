@@ -45,11 +45,11 @@ function Subscription({ onNavigate }) {
         '✓ View 500 posts/day',
         '✓ 50% fewer ads',
         '✓ Priority support',
-        '✓ FREE for 2 months! 🎉',
+        '✓ Currently FREE (may charge in future) 🚀',
       ],
-      badge: 'FREE FOR 2 MONTHS',
+      badge: 'CURRENTLY FREE',
       color: 'from-blue-400 to-blue-600',
-      buttonText: 'Claim Free Trial',
+      buttonText: 'Get Premium',
       buttonClass: 'bg-blue-500 hover:bg-blue-600',
     },
     {
@@ -64,11 +64,11 @@ function Subscription({ onNavigate }) {
         '✓ Unlimited posts',
         '✓ No ads at all',
         '✓ VIP support 24/7',
-        '✓ FREE for 2 months! 🎉',
+        '✓ Currently FREE (may charge in future) 🚀',
       ],
-      badge: 'FREE FOR 2 MONTHS',
+      badge: 'CURRENTLY FREE',
       color: 'from-yellow-400 to-yellow-600',
-      buttonText: 'Claim Free Trial',
+      buttonText: 'Get Pro',
       buttonClass: 'bg-yellow-500 hover:bg-yellow-600',
     },
   ];
@@ -82,9 +82,9 @@ function Subscription({ onNavigate }) {
         return;
       }
       
-      // For free trial plans
+      // For premium/pro plans (currently free)
       if (planId === 'premium' || planId === 'pro') {
-        const trialMessage = `🎉 Congratulations!\n\nYou've been activated for ${planId.toUpperCase()} plan for FREE for 2 months!\n\nAfter 2 months, you'll be charged:\n${planId === 'premium' ? '₹99/month' : '₹299/month'}\n\nYou'll receive a reminder before billing starts.`;
+        const trialMessage = `🎉 Congratulations!\n\nYou've been activated for ${planId.toUpperCase()} plan!\n\nCurrently it's completely FREE. In the future, we may charge:\n${planId === 'premium' ? '₹99/month' : '₹299/month'}\n\nYou'll receive a notice before we start charging.`;
         alert(trialMessage);
         return;
       }

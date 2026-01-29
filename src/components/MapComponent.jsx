@@ -96,7 +96,7 @@ function MapComponent({ zoom = 3, onNavigate }) {
     }
     
     try {
-      const response = await axios.get(`http://localhost:5000/api/cities/${cityId}/sub-cities`);
+      const response = await axios.get(`https://api.dhvanicast.com/api/cities/${cityId}/sub-cities`);
       const subCities = response.data.data || [];
       setSubCitiesData(prev => ({
         ...prev,

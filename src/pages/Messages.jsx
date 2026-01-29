@@ -14,6 +14,9 @@ function Messages({ onNavigate }) {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [activeUsers, setActiveUsers] = useState(new Set());
+  const [editingMessageId, setEditingMessageId] = useState(null);
+  const [editingText, setEditingText] = useState('');
+  const [hoveredMessageId, setHoveredMessageId] = useState(null);
 
   // Fetch users for chat when component loads
   useEffect(() => {
@@ -46,7 +49,10 @@ function Messages({ onNavigate }) {
   useEffect(() => {
     if (!user) return;
     
-    const SOCKET_URL = 'https://api.dhvanicast.com';
+    const SOCKET_URL = process.env.NODE_ENV === 'production' 
+      ? 'https://api.dhvanicast.com'
+      : 'https://api.dhvanicast.com';
+    
     const newSocket = io(SOCKET_URL, {
       auth: { userId: user._id || user.id },
       transports: ['websocket'],
@@ -79,7 +85,7 @@ function Messages({ onNavigate }) {
     newSocket.on('receive_message', (data) => {
       console.log('📨 Real-time message received:', data);
       
-      // Message key should be the sender's ID (to match the conversation)
+      // Message key is the sender's ID (person who sent the message)
       const conversationKey = data.sender;
       
       // Update messages for this conversation
@@ -102,6 +108,12 @@ function Messages({ onNavigate }) {
           }
         }, 100);
       }
+    });
+
+    // Message sent confirmation - update sender's UI
+    newSocket.on('message_sent', (data) => {
+      console.log('✅ Message sent confirmation received:', data);
+      console.log('📝 Message confirmed sent to:', data.receiver);
     });
 
     // Typing indicator
@@ -133,15 +145,20 @@ function Messages({ onNavigate }) {
     });
 
     setSocket(newSocket);
+    
     return () => {
       newSocket.off('active_users_list');
       newSocket.off('receive_message');
+      newSocket.off('message_sent');
       newSocket.off('user_online');
       newSocket.off('user_typing');
       newSocket.off('message_delivered');
+      newSocket.off('connect');
+      newSocket.off('disconnect');
+      newSocket.off('connect_error');
       newSocket.disconnect();
     };
-  }, [user, selectedChat]);
+  }, [user]);
 
   // Load messages when chat is selected
   const handleSelectChat = async (chat) => {
@@ -176,52 +193,66 @@ function Messages({ onNavigate }) {
     if (!messageInput.trim() || !selectedChat) return;
 
     setSendingMessage(true);
+    const messageText = messageInput;
+    
     console.log('📤 Sending message...');
-    console.log('From:', user._id, 'To:', selectedChat._id);
+    console.log('From User ID:', user._id || user.id);
+    console.log('To User ID:', selectedChat._id);
     console.log('Socket connected:', socket?.connected);
+    console.log('Message:', messageText);
     
     try {
-      // Send via API to save to DB
-      const apiResponse = await messagesAPI.sendMessage({
-        receiver: selectedChat._id,
-        content: messageInput
-      });
-      console.log('✅ Message saved to DB:', apiResponse.data);
-
-      // Send via socket for realtime delivery
-      if (socket && socket.connected) {
-        socket.emit('send_message', {
-          sender: user._id || user.id,
-          receiver: selectedChat._id,
-          content: messageInput,
-          _id: apiResponse.data?._id
-        });
-        console.log('✅ Message sent via Socket.io');
-      }
-
-      const newMessage = {
+      // Add message to UI immediately (optimistic update)
+      const tempMessage = {
         id: Date.now(),
         sender: 'you',
-        text: messageInput,
+        text: messageText,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
       setChatMessages(prev => ({
         ...prev,
-        [selectedChat._id]: [...(prev[selectedChat._id] || []), newMessage]
+        [selectedChat._id]: [...(prev[selectedChat._id] || []), tempMessage]
       }));
+
+      // Clear input immediately
+      setMessageInput('');
+
+      // Send via API to save to DB
+      const apiResponse = await messagesAPI.sendMessage({
+        receiver: selectedChat._id,
+        content: messageText
+      });
+      console.log('✅ Message saved to DB:', apiResponse.data);
+
+      // Send via socket for realtime delivery to other user
+      if (socket && socket.connected) {
+        socket.emit('send_message', {
+          sender: user._id || user.id,
+          receiver: selectedChat._id,
+          content: messageText,
+          _id: apiResponse.data?._id
+        });
+        console.log('✅ Message emitted via Socket.io to receiver');
+      } else {
+        console.warn('⚠️ Socket not connected, message saved via API only');
+      }
 
       // Update last message in chat list
       setChats(prev => prev.map(chat => 
         chat._id === selectedChat._id 
-          ? { ...chat, lastMessage: messageInput, time: 'just now' }
+          ? { ...chat, lastMessage: messageText, time: 'just now' }
           : chat
       ));
 
-      setMessageInput('');
     } catch (error) {
       console.error('Error sending message:', error);
       alert('Failed to send message');
+      // Remove the optimistic message on error
+      setChatMessages(prev => ({
+        ...prev,
+        [selectedChat._id]: (prev[selectedChat._id] || []).slice(0, -1)
+      }));
     } finally {
       setSendingMessage(false);
     }
@@ -230,7 +261,57 @@ function Messages({ onNavigate }) {
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      if (editingMessageId) {
+        handleUpdateMessage();
+      } else {
+        handleSendMessage();
+      }
+    }
+  };
+
+  const handleEditMessage = (messageId, text) => {
+    setEditingMessageId(messageId);
+    setEditingText(text);
+  };
+
+  const handleUpdateMessage = async () => {
+    if (!editingText.trim() || !editingMessageId) return;
+
+    try {
+      await messagesAPI.updateMessage(editingMessageId, { content: editingText });
+      
+      // Update UI
+      setChatMessages(prev => ({
+        ...prev,
+        [selectedChat._id]: prev[selectedChat._id].map(msg =>
+          msg.id === editingMessageId ? { ...msg, text: editingText, isEdited: true } : msg
+        )
+      }));
+      
+      setEditingMessageId(null);
+      setEditingText('');
+    } catch (error) {
+      console.error('Error updating message:', error);
+      alert('Failed to update message');
+    }
+  };
+
+  const handleDeleteMessage = async (messageId) => {
+    if (!window.confirm('Delete this message?')) return;
+
+    try {
+      await messagesAPI.deleteMessage(messageId);
+      
+      // Update UI
+      setChatMessages(prev => ({
+        ...prev,
+        [selectedChat._id]: prev[selectedChat._id].map(msg =>
+          msg.id === messageId ? { ...msg, text: '🗑️ This message was deleted', deleted: true } : msg
+        )
+      }));
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      alert('Failed to delete message');
     }
   };
 
@@ -381,7 +462,7 @@ function Messages({ onNavigate }) {
               </div>
             </div>
             
-            <div className="flex-1 overflow-y-auto mb-4 space-y-3 pr-2" data-messages-container>
+            <div className="flex-1 overflow-y-auto mb-4 space-y-4 pr-2" data-messages-container>
               {loadingMessages ? (
                 <div className="flex justify-center items-center h-32">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -389,12 +470,72 @@ function Messages({ onNavigate }) {
               ) : (
                 <>
                   {(chatMessages[selectedChat._id] || []).map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.sender === 'you' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-xs rounded-lg p-3 ${msg.sender === 'you' 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-800 border border-gray-700 text-gray-300'}`}>
-                        <p className="text-sm">{msg.text}</p>
-                        <p className={`text-xs mt-1 ${msg.sender === 'you' ? 'text-blue-200' : 'text-gray-500'}`}>{msg.time}</p>
+                    <div 
+                      key={msg.id} 
+                      className={`flex ${msg.sender === 'you' ? 'justify-end' : 'justify-start'}`}
+                      onMouseEnter={() => setHoveredMessageId(msg.id)}
+                      onMouseLeave={() => setHoveredMessageId(null)}
+                    >
+                      <div className="relative group">
+                        {editingMessageId === msg.id ? (
+                          <div className={`max-w-xs rounded-xl p-3 ${msg.sender === 'you' 
+                            ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-br-none' 
+                            : 'bg-gradient-to-r from-gray-700 to-gray-600 border border-gray-600 text-gray-100 rounded-bl-none'}`}>
+                            <textarea 
+                              value={editingText}
+                              onChange={(e) => setEditingText(e.target.value)}
+                              onKeyPress={handleKeyPress}
+                              className="w-full bg-transparent text-sm resize-none focus:outline-none"
+                              rows="2"
+                            />
+                            <div className="flex gap-2 mt-2">
+                              <button 
+                                onClick={handleUpdateMessage}
+                                className="text-xs px-2 py-1 bg-green-600 rounded hover:bg-green-700"
+                              >
+                                Save
+                              </button>
+                              <button 
+                                onClick={() => setEditingMessageId(null)}
+                                className="text-xs px-2 py-1 bg-gray-600 rounded hover:bg-gray-700"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <div className={`max-w-xs rounded-xl p-3 shadow-lg ${msg.sender === 'you' 
+                              ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-br-none' 
+                              : 'bg-gradient-to-r from-gray-700 to-gray-600 border border-gray-600 text-gray-100 rounded-bl-none'}`}>
+                              <p className="text-sm font-medium break-words">{msg.text}</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <p className={`text-xs ${msg.sender === 'you' ? 'text-blue-100' : 'text-gray-400'}`}>{msg.time}</p>
+                                {msg.isEdited && <span className={`text-xs ${msg.sender === 'you' ? 'text-blue-100' : 'text-gray-400'}`}>(edited)</span>}
+                              </div>
+                            </div>
+                            
+                            {/* Message Actions - Show on hover for own messages */}
+                            {msg.sender === 'you' && hoveredMessageId === msg.id && !msg.deleted && (
+                              <div className="absolute -top-8 right-0 flex gap-1 bg-gray-800 rounded-lg p-1 border border-gray-700">
+                                <button 
+                                  onClick={() => handleEditMessage(msg.id, msg.text)}
+                                  className="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded"
+                                  title="Edit message"
+                                >
+                                  ✏️ Edit
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteMessage(msg.id)}
+                                  className="px-2 py-1 text-xs bg-red-600 hover:bg-red-700 text-white rounded"
+                                  title="Delete message"
+                                >
+                                  🗑️ Delete
+                                </button>
+                              </div>
+                            )}
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -403,18 +544,21 @@ function Messages({ onNavigate }) {
             </div>
             
             <div className="space-y-2 flex-shrink-0">
+              {editingMessageId ? (
+                <div className="text-xs text-blue-400 px-2">Editing message...</div>
+              ) : null}
               <textarea 
                 placeholder="Type a message..." 
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
+                value={editingMessageId ? editingText : messageInput}
+                onChange={(e) => editingMessageId ? setEditingText(e.target.value) : setMessageInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 disabled={sendingMessage}
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-500 resize-none disabled:opacity-50" 
                 rows="3"
               />
               <button 
-                onClick={handleSendMessage}
-                disabled={!messageInput.trim() || sendingMessage}
+                onClick={editingMessageId ? handleUpdateMessage : handleSendMessage}
+                disabled={!(editingMessageId ? editingText.trim() : messageInput.trim()) || sendingMessage}
                 className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm font-semibold py-2 rounded-lg transition-all"
               >
                 {sendingMessage ? 'Sending...' : 'Send Message'}

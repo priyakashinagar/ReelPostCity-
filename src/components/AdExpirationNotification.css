@@ -1,0 +1,180 @@
+.ad-notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.notifications-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notification-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
+  border-left: 4px solid #667eea;
+}
+
+.notification-card.expiring {
+  border-left-color: #ff9800;
+  background: linear-gradient(135deg, #fff8f0 0%, #ffffff 100%);
+}
+
+.notification-card.expired {
+  border-left-color: #d32f2f;
+  background: linear-gradient(135deg, #ffebee 0%, #ffffff 100%);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.notification-content {
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+}
+
+.notification-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.notification-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.notification-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+}
+
+.notification-message {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.notification-details {
+  margin: 0;
+  font-size: 12px;
+  color: #999;
+  padding: 8px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 8px;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-primary,
+.btn-danger,
+.btn-secondary {
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 8px 12px;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #666;
+  padding: 8px;
+  min-width: auto;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+/* Scrollbar styling */
+.ad-notification-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ad-notification-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ad-notification-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.ad-notification-container::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .ad-notification-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: 100%;
+  }
+
+  .notification-content {
+    flex-direction: column;
+    padding: 12px;
+  }
+
+  .notification-actions {
+    flex-direction: row;
+  }
+
+  .btn-primary,
+  .btn-danger,
+  .btn-secondary {
+    flex: 1;
+  }
+}

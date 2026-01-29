@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/users';
+const API_URL = 'https://api.dhvanicast.com/api/users';
 
 // Normalize user object from backend format to frontend format
 const normalizeUser = (user) => ({

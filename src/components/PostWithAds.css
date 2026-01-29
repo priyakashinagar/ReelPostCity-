@@ -1,0 +1,384 @@
+.post-with-ads {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+/* Post Content */
+.post-content {
+  padding: 15px;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.post-user-info {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.post-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.post-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.post-username {
+  margin: 0;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.post-city {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.post-menu-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+/* Post Image */
+.post-image-container {
+  width: 100%;
+  max-height: 400px;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  background: #f0f0f0;
+}
+
+.post-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Post Caption */
+.post-caption {
+  margin-bottom: 15px;
+}
+
+.post-caption p {
+  margin: 0 0 10px 0;
+  color: #333;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.post-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background: #f0f0f0;
+  color: #667eea;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Post Actions */
+.post-actions {
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 10px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 13px;
+}
+
+.action-btn:hover {
+  background: #f5f5f5;
+  color: #667eea;
+}
+
+/* Ads Section */
+.ads-section {
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  padding: 20px;
+  border-top: 2px solid #667eea;
+}
+
+.ads-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.ads-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.ads-count {
+  background: #667eea;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Ads Carousel */
+.ads-carousel {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+  overflow-x: auto;
+  padding: 5px 0;
+}
+
+.ad-card {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s;
+  border: 2px solid transparent;
+}
+
+.ad-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+  border-color: #667eea;
+}
+
+.ad-card.expiring-soon {
+  border-color: #ff9800;
+  background: #fff8f0;
+}
+
+.ad-card.expired {
+  opacity: 0.6;
+  border-color: #ccc;
+  background: #f5f5f5;
+}
+
+/* Ad Image */
+.ad-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background: #f0f0f0;
+  cursor: pointer;
+}
+
+.ad-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.ad-card:hover .ad-image {
+  transform: scale(1.05);
+}
+
+.ad-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.ad-card:hover .ad-overlay {
+  opacity: 1;
+}
+
+.view-ad-btn {
+  background: white;
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.view-ad-btn:hover {
+  background: #667eea;
+  color: white;
+}
+
+/* Ad Info */
+.ad-info {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ad-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.3;
+}
+
+.ad-description {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* Ad Stats */
+.ad-stats {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  color: #666;
+  padding: 8px 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ad-stats span {
+  flex: 1;
+  text-align: center;
+  padding: 4px 0;
+}
+
+/* Expiry Info */
+.ad-expiry {
+  padding: 8px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ad-expiry p {
+  margin: 0;
+}
+
+.expired-text {
+  color: #d32f2f;
+  background: #ffebee;
+}
+
+.expiring-text {
+  color: #f57c00;
+  background: #fff3e0;
+}
+
+.valid-text {
+  color: #388e3c;
+  background: #e8f5e9;
+}
+
+/* Ad Owner */
+.ad-owner {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-top: 1px solid #f0f0f0;
+  font-size: 11px;
+  color: #999;
+}
+
+.ad-owner small {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* CTA Button */
+.ad-cta-btn {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.ad-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.ad-card.expired .ad-cta-btn {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ads-carousel {
+    grid-template-columns: 1fr;
+  }
+
+  .post-actions {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .action-btn {
+    padding: 12px;
+  }
+}
