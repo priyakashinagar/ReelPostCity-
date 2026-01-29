@@ -8,7 +8,7 @@ import postService from '../services/postService.js';
 // Get API URL from environment
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-// Load Leaflet CSS from CDN - Only once
+// Load Leaflet CSS from CDN - Only for once
 if (!document.querySelector('link[href*="leaflet.min.css"]')) {
   const link = document.createElement('link');
   link.rel = 'stylesheet';
